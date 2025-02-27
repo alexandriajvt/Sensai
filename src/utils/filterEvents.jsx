@@ -1,0 +1,1 @@
+//Filters events based on user interests

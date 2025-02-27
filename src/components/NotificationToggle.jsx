@@ -1,0 +1,1 @@
+//Allows users to enable/disable notifications

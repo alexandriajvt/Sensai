@@ -1,0 +1,1 @@
+//Manages notification preferences and calendar integrations
