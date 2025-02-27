@@ -1,0 +1,1 @@
+//Detailed view of a single event with rsvp options

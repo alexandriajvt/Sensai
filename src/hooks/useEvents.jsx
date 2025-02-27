@@ -1,0 +1,1 @@
+//Fetches and filters events based on user preferences

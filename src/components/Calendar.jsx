@@ -1,3 +1,4 @@
+//Displays events in a calendar format
 import React from 'react';
 
 const Calendar = () => {
