@@ -14,13 +14,13 @@ function CalendarPage() {
   return (
     <div className="calendar-page">
       <h1>Event Calendar</h1>
-      <ul>
+      {/* <ul>
         {events.map(event => (
           <li key={event.id}>
             <Link to={`/event/${event.id}`}>{event.name} - {event.date}</Link>
           </li>
         ))}
-      </ul>
+      </ul> */}
     </div>
   );
 }
