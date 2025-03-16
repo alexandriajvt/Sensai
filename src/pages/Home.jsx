@@ -1,1 +1,0 @@
-//Displays feautured events and a quick navigation
