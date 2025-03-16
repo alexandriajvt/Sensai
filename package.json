@@ -1,6 +1,6 @@
 {
   "name": "sensai-react-frame",
-<<<<<<< HEAD
+
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -22,7 +22,6 @@
       "react-app/jest"
     ]
   },
-=======
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
@@ -870,7 +869,6 @@
   "author": "",
   "license": "ISC",
   "description": "",
->>>>>>> 731e854 (adds necessary json files)
   "browserslist": {
     "production": [
       ">0.2%",
