@@ -11,9 +11,9 @@ import logo from '/Users/kumuluvv/sensai-react-frame/src/Sensei Logo.png' // Rep
 
 function MainNavBar() {
   return (
-    <Navbar expand="lg" className="bg-body-tertiary w-100">
+    <Navbar expand="lg" className="bg-body-tertiary w-100" >
       <Container>
-        <Navbar.Brand href="/home"> 
+        <Navbar.Brand href="/calendar"> 
           <img
             src={logo}
             width="75"
@@ -25,16 +25,11 @@ function MainNavBar() {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="justify-content-between w-100">
             <Nav.Link as={Link} to="/calendar">Calendar</Nav.Link> 
+            <Nav.Link as={Link} to="/explore">Explore</Nav.Link> 
             <NavDropdown title="Me" id="basic-nav-dropdown">
-              <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.2">
-                Another action
-              </NavDropdown.Item>
-              <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to ="/profile">Profile</NavDropdown.Item>
               <NavDropdown.Divider />
-              <NavDropdown.Item href="#action/3.4">
-                Separated link
-              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/settings">Settings </NavDropdown.Item>
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>
@@ -42,15 +37,5 @@ function MainNavBar() {
     </Navbar>
   );
 }
-
-
-// function Navbar() {
-//   return (
-//     <nav className="navbar">
-//       <Link to="/">Home</Link>
-//       <Link to="/calendar">Calendar</Link>
-//     </nav>
-//   );
-// }
 
 export default MainNavBar;
