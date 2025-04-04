@@ -9,22 +9,59 @@ import SignInPage from "./pages/SignInPage";
 import MainNavBar from './components/Navbar';
 import {Routes, Route,} from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { RequireAuth } from "react-auth-kit";
+//import AuthOutlet from '@auth-kit/react-router/AuthOutlet'
 //import RequireAuth from '@auth-kit/react-router/RequireAuth';
-console.log('App component is rendering');
+import RequireAuth from '@auth-kit/react-router/RequireAuth';
+import { useContext } from "react";
+import AuthContext from "react-auth-kit";
 
+
+console.log('App component is rendering');
+console.log("RequireAuth:", RequireAuth);
+console.log("ProtectedRoute:", ProtectedRoute);
+
+console.log(RequireAuth);
+//console.log(AuthOutlet)
+//          <Route path="/calendar"element={<RequireAuth fallbackPath="/signIn"><CalendarPage /></RequireAuth>}/>
+
+
+
+/*
 function App() {
+  const authContext = useContext(AuthContext); // Use the context inside the component
+
+  console.log("AuthContext:", authContext); // Log the context here to debug
   return (
     <div> 
-        <MainNavBar /> {/* Navbar appears on all pages */}
+        <MainNavBar /> {/* Navbar appears on all pages }
         <Routes>
           <Route path="/signIn" element={<SignInPage />} />
-          <Route path="/calendar"element={<RequireAuth fallbackPath="/signin"><CalendarPage /></RequireAuth>}/>
+          <Route path="/calendar"element={<RequireAuth fallbackPath="/signIn"><CalendarPage /></RequireAuth>}/>
           <Route path="/explore" element={<ProtectedRoute><ExplorePage /></ProtectedRoute>} />
           <Route path="/event/:id" element={<ProtectedRoute><EventDetailsPage /></ProtectedRoute>} />
           <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
         </Routes>
+    </div>  
+  );
+}
+*/
+
+function App() {
+  const authContext = useContext(AuthContext); // Use the context inside the component
+
+  console.log("AuthContext:", authContext); // Log the context here to debug
+  return (
+    <div> 
+        <MainNavBar /> {/* Navbar appears on all pages */}
+          <Routes>
+          <Route path="/signIn" element={<SignInPage />} />
+            <Route path="/calendar"element={<RequireAuth fallbackPath="/signIn"><CalendarPage /></RequireAuth>}/>
+            <Route path="/explore" element={<ProtectedRoute><ExplorePage /></ProtectedRoute>} />
+            <Route path="/event/:id" element={<ProtectedRoute><EventDetailsPage /></ProtectedRoute>} />
+            <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+          </Routes>
     </div>  
   );
 }

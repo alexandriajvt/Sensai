@@ -4,10 +4,9 @@ import './index.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
-import { AuthProvider} from "react-auth-kit";
+import AuthProvider from "react-auth-kit"; //DEFAULT EXPORT so default import
 import createStore from 'react-auth-kit/createStore';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
 
 
 const store = createStore({//Initializes the authentication store with configurations for cookie storage.
@@ -16,19 +15,22 @@ const store = createStore({//Initializes the authentication store with configura
   cookieDomain: window.location.hostname,
   cookieSecure: window.location.protocol === 'https:',
 });
+console.log("Store: ", store);//debugging the store
 
-//AuthProvider Wraps the application to provide authentication context. 
-// It's crucial that AuthProvider wraps around BrowserRouter to ensure routing works correctly with authentication.
+
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <AuthProvider store = {store}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </AuthProvider>
-  </React.StrictMode>
+  <AuthProvider store = {store}>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </AuthProvider>
+</React.StrictMode>
 );
+
+
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
