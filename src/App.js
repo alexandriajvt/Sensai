@@ -55,12 +55,12 @@ function App() {
     <div> 
         <MainNavBar /> {/* Navbar appears on all pages */}
           <Routes>
-          <Route path="/signIn" element={<SignInPage />} />
-            <Route path="/calendar"element={<RequireAuth fallbackPath="/signIn"><CalendarPage /></RequireAuth>}/>
-            <Route path="/explore" element={<ProtectedRoute><ExplorePage /></ProtectedRoute>} />
-            <Route path="/event/:id" element={<ProtectedRoute><EventDetailsPage /></ProtectedRoute>} />
-            <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-            <Route path="settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="/" element={<CalendarPage />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/explore" element={<ExplorePage />} />
+            <Route path="/event/:id" element={<EventDetailsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Routes>
     </div>  
   );
