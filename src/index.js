@@ -4,29 +4,27 @@ import './index.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
-import AuthProvider from "react-auth-kit"; //DEFAULT EXPORT so default import
+import AuthProvider from "react-auth-kit";
+//import AuthProvider from "react-auth-kit"; //DEFAULT EXPORT so default import
 import createStore from 'react-auth-kit/createStore';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
-const store = createStore({//Initializes the authentication store with configurations for cookie storage.
-  authName:'_auth',
-  authType:'cookie',
+const store = createStore({
+  authType: 'cookie',
+  authName: '_auth',
   cookieDomain: window.location.hostname,
-  cookieSecure: window.location.protocol === 'https:',
+  cookieSecure: false // Set to true in production
 });
-console.log("Store: ", store);//debugging the store
-
-
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-  <AuthProvider store = {store}>
-    <BrowserRouter>
-      <App />
+      <BrowserRouter>
+        <AuthProvider store = {store}>
+          <App />
+      </AuthProvider>
     </BrowserRouter>
-  </AuthProvider>
 </React.StrictMode>
 );
 

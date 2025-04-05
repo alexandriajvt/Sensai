@@ -1,11 +1,11 @@
-import React from "react";
-import { useAuthUser } from "react-auth-kit";
-import { Navigate } from "react-router-dom";
+import React from 'react';
+import  useAuthUser  from 'react-auth-kit';
+import { Navigate } from 'react-router-dom';
 
-function ProtectedRoute({ children }) {
+const ProtectedRoute = ({ children }) => {
   const auth = useAuthUser();
 
-  return auth() ? children : <Navigate to="/signin" />;
-}
+  return auth() ? children : <Navigate to="/login" replace/>;
+};
 
 export default ProtectedRoute;

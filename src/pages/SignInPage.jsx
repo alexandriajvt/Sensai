@@ -1,17 +1,14 @@
 import React from "react";
 import SignInDialogue from "../components/SignInDialogue";
-import { Container, Row, Col } from "react-bootstrap";
 
-function SignInPage() {
+
+const SignInPage = () => {
   return (
-    <Container className="d-flex justify-content-center align-items-center vh-100">
-      <Row>
-        <Col>
-          <SignInDialogue />
-        </Col>
-      </Row>
-    </Container>
+    <div>
+      <h1>Sign In</h1>
+      <SignInDialogue />
+    </div>
   );
-}
+};
 
 export default SignInPage;

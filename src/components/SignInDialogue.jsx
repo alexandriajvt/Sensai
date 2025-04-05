@@ -1,62 +1,62 @@
-import React, { useState } from "react";
-import { useSignIn } from "react-auth-kit";
-import { useNavigate } from "react-router-dom";
-import { Button, Form, Card } from "react-bootstrap";
+import React from "react";
+import useSignIn from "react-auth-kit";
 
 function SignInDialogue() {
-  const signIn = useSignIn();//This initializes the sign-in function, which will store authentication data upon success.
-  const navigate = useNavigate();//This initializes a navigation function to redirect users after signing in.
-  //state variables
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  console.log("SignInDialogue is rendering"); // Debug log
+  const signIn = useSignIn();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();//prevents the page from refreshing when the form is submitted.
-    if (email === "test@example.com" && password === "password123") {//example ahrdcoded user info. replace with ikenna's backend API call
+  const handleLogin = async () => {
+    // Mocking a successful response from the backend
+    const mockResponse = {
+      success: true,
+      token: "mock-jwt-token",
+      expiresIn: 3600, // 1 hour in seconds
+      user: { username: "exampleUser" }, // Mock user details
+    };
+
+    if (mockResponse.success) {
+      // Store the mock token using signIn
       signIn({
-        token: "fake-jwt-token",//replace witk ttoken received from backend after authentication
-        expiresIn: 3600,//Token expires in 1 hour
-        tokenType: "Bearer",//Standard authentication token type.
-        authState: { email },//Stores the user’s email in the auth state.
+        token: mockResponse.token,
+        expiresIn: mockResponse.expiresIn,
+        tokenType: "Bearer",
+        authState: { user: mockResponse.user },
       });
-      navigate("/calendar");//Redirects the User to the Calendar Page if login is successful.
+      console.log("Mock login successful");
     } else {
-      setError("Invalid email or password");
+      console.error("Mock login failed");
     }
+
+
+    // try {
+    //   const response = await fetch('http://localhost:5000/login', {
+    //     method: 'POST',
+    //     body: JSON.stringify({
+    //       username: 'exampleUser',
+    //       password: 'examplePassword',
+    //     }),
+    //     headers: { 'Content-Type': 'application/json' },
+    //   });
+
+    //   const data = await response.json();
+    //   if (data.success) {
+    //     // Store the token using React Auth Kit's signIn function
+    //     signIn({
+    //       token: data.token, // Token returned from the backend
+    //       expiresIn: data.expiresIn, // Token expiration time
+    //       tokenType: 'Bearer',
+    //       authState: { user: data.user }, // Additional user details
+    //     });
+    //   } else {
+    //     console.error('Login failed:', data.message);
+    //   }
+    // } catch (error) {
+    //   console.error('Error logging in:', error);
+    // }
   };
 
-  return (
-    <Card className="p-4">
-      <Card.Body>
-        <h2 className="text-center mb-4">Sign In</h2>
-        {error && <p className="text-danger">{error}</p>}
-        <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3">
-            <Form.Label>Email</Form.Label>
-            <Form.Control
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </Form.Group>
-          <Button variant="primary" type="submit" className="w-100">
-            Sign In
-          </Button>
-        </Form>
-      </Card.Body>
-    </Card>
-  );
-}
+  return <button onClick={handleLogin}>Sign In</button>;
+
+};
 
 export default SignInDialogue;
