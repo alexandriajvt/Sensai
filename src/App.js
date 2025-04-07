@@ -2,13 +2,13 @@ import './App.css';
 import React from 'react';
 import CalendarPage from './pages/CalendarPage';
 import ExplorePage from './pages/ExplorePage';
-import EventDetailsPage from './pages/EventDetailsPage';
+//import EventDetailsPage from './pages/EventDetailsPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import SignInPage from "./pages/SignInPage";
 import MainNavBar from './components/Navbar';
 import {Routes, Route,} from "react-router-dom";
-import RequireAuth from '@auth-kit/react-router/RequireAuth';
+//import RequireAuth from '@auth-kit/react-router/RequireAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 
 

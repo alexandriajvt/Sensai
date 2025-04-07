@@ -8,23 +8,30 @@ import AuthProvider from "react-auth-kit";
 //import AuthProvider from "react-auth-kit"; //DEFAULT EXPORT so default import
 import createStore from 'react-auth-kit/createStore';
 import 'bootstrap/dist/css/bootstrap.min.css';
+//import { AUTH_CONFIG } from './constants';
 
 
-const store = createStore({
-  authType: 'cookie',
-  authName: '_auth',
-  cookieDomain: window.location.hostname,
-  cookieSecure: false // Set to true in production
+// const authStore = createStore({
+//   ...AUTH_CONFIG, //// Spread all shared settings
+//   authType: 'cookie', //// Add store-specific ones
+// });
+
+const testStore = createStore({
+  authName: 'test_auth',
+  authType: 'localstorage' // Simpler than cookies
 });
+
+console.log('Auth store created:', testStore); // Should log an object
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
+    {/*<AuthProvider store ={authStore} {...AUTH_CONFIG}>*/}
+    <AuthProvider store = {testStore}>
       <BrowserRouter>
-        <AuthProvider store = {store}>
           <App />
-      </AuthProvider>
-    </BrowserRouter>
+       </BrowserRouter>
+    </AuthProvider>
 </React.StrictMode>
 );
 

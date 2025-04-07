@@ -5,6 +5,10 @@ function SignInDialogue() {
   console.log("SignInDialogue is rendering"); // Debug log
   const signIn = useSignIn();
 
+  console.log('SignIn function exists?', !!signIn); // Should log `true`
+
+  
+
   const handleLogin = async () => {
     // Mocking a successful response from the backend
     const mockResponse = {
@@ -20,7 +24,7 @@ function SignInDialogue() {
         token: mockResponse.token,
         expiresIn: mockResponse.expiresIn,
         tokenType: "Bearer",
-        authState: { user: mockResponse.user },
+        authState: { user: mockResponse.user , role: "admin"},
       });
       console.log("Mock login successful");
     } else {
@@ -55,8 +59,12 @@ function SignInDialogue() {
     // }
   };
 
-  return <button onClick={handleLogin}>Sign In</button>;
-
+  return (
+    <div>
+      <h1>Login</h1>
+      <button onClick={handleLogin}>Sign in</button>
+    </div>
+  );
 };
 
 export default SignInDialogue;
