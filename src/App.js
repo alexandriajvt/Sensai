@@ -2,32 +2,31 @@ import './App.css';
 import React from 'react';
 import CalendarPage from './pages/CalendarPage';
 import ExplorePage from './pages/ExplorePage';
-import EventDetailsPage from './pages/EventDetailsPage';
+//import EventDetailsPage from './pages/EventDetailsPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
-import HomePage from './pages/HomePage';
+import SignInPage from "./pages/SignInPage";
 import MainNavBar from './components/Navbar';
 import {Routes, Route,} from "react-router-dom";
-//import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-console.log('App component is rendering');
+//import RequireAuth from '@auth-kit/react-router/RequireAuth';
+import ProtectedRoute from './components/ProtectedRoute';
+
 
 function App() {
   return (
-    // <div className="App">
-    //   <h1>App is rendering!</h1> {/* Check if this appears */}
-    //   <CalendarPage />
     <div> 
-      <MainNavBar /> {/* Navbar appears on all pages */}
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/calendar" element={<CalendarPage />} />
-        <Route path="/explore" element={<ExplorePage />} />
-        <Route path="/event/:id" element={<EventDetailsPage />} />
-        <Route path="profile" element={<ProfilePage />} />
-        <Route path="settings" element={<SettingsPage />} />
-      </Routes>
+        <MainNavBar /> {/* Navbar appears on all pages */}
+        <Routes>
+          {/* Public Route for Sign-In */}
+          <Route path="/" element={<SignInPage />} />
+          <Route path="/login" element={<SignInPage />} />
+          {/* Protected Routes */}
+          <Route path="/explore" element={<ProtectedRoute><ExplorePage/></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><SettingsPage/></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage/></ProtectedRoute>} />
+          <Route path="/calendar" element={<ProtectedRoute><CalendarPage/></ProtectedRoute>} />
+        </Routes>
     </div>  
   );
 }
-
 export default App;
