@@ -26,6 +26,10 @@ function SignInDialogue() {
   return (
     <div>
       <p>Click below to simulate sign-in:</p>
+      <label htmlFor="username">Username</label>
+      <input type= "text" name = "username" />
+      <label htmlFor="password">Password</label>
+      <input type= "text" name = "password" />
       <button onClick={handleLogin}>Sign In</button>
     </div>
   );
