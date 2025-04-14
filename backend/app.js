@@ -17,7 +17,10 @@ app.get('/', (req, res) => {
   res.send('Sensei backend is running!');
 });
 
+console.log('Sensei backend is running!')
 // Import your routes
+
+
 const authRoutes = require('./routes/auth.routes');
 app.use('/api/auth', authRoutes);
 
