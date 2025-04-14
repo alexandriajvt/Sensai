@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import useSignIn from 'react-auth-kit/hooks/useSignIn';
+import {useNavigate} from 'react-router-dom'; 
 
 function SignInDialogue() {
   // Authentication state
@@ -9,6 +10,7 @@ function SignInDialogue() {
   // Login state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   // Registration state
   const [name, setName] = useState('');
@@ -45,6 +47,7 @@ function SignInDialogue() {
 
       if (success) {
         console.log('Login successful!');
+        navigate('/calendar');
       } else {
         console.error('SignIn failed');
       }
