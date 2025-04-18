@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import {useNavigate} from 'react-router-dom'; 
+import useSignOut from 'react-auth-kit/hooks/useSignOut';
 
 function LogOutDialogue(){
     const [message] = useState('');
     const navigate = useNavigate();
+    const signOut = useSignOut();
 
     const handleLogout = async () => {
         try{
@@ -16,9 +18,10 @@ function LogOutDialogue(){
             if (!response.ok) {
                 console.error('Logout failed', data.error);
                 return;
-              }
-              console.log(message);//make sure after this, the user is actually logged out such that they should not be able to accessa ny other page except the logout page
-              navigate('/login')
+            }
+            signOut(); //clears the auth data from storage (cookie/localStorage)
+            console.log('Logged out successfully');//make sure after this, the user is actually logged out such that they should not be able to accessa ny other page except the logout page
+            navigate('/login')
         }catch(err){
             console.error("log out failed for Dev check console.");
         }
