@@ -7,4 +7,7 @@ const authenticateToken = require('../middleware/auth.middleware');
 // GET /api/users/:id - Retrieve user information
 router.get('/:id', authenticateToken, userController.getUserInfo);
 
+router.put('/:id', authenticateToken, userController.updateUser);
+  
+
 module.exports = router;
