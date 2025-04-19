@@ -28,6 +28,9 @@ app.use('/api/auth', loginRoutes);
 const userRoutes = require('./routes/user.routes');
 app.use('/api/users', userRoutes);
 
+const eventRoutes = require('./routes/events.routes');
+app.use('/api/events', eventRoutes);
+
 // Error-handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
