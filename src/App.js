@@ -6,6 +6,7 @@ import ExplorePage from './pages/ExplorePage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import SignInPage from "./pages/SignInPage";
+import LogOutPage from "./pages/LogOutPage";
 import MainNavBar from './components/Navbar';
 import {Routes, Route,} from "react-router-dom";
 //import RequireAuth from '@auth-kit/react-router/RequireAuth';
@@ -20,11 +21,16 @@ function App() {
           {/* Public Route for Sign-In */}
           <Route path="/" element={<SignInPage />} />
           <Route path="/login" element={<SignInPage />} />
+
+
           {/* Protected Routes */}
-          <Route path="/explore" element={<ProtectedRoute><ExplorePage/></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><SettingsPage/></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage/></ProtectedRoute>} />
-          <Route path="/calendar" element={<ProtectedRoute><CalendarPage/></ProtectedRoute>} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/explore" element={<ExplorePage/>} />
+            <Route path="/settings" element={<SettingsPage/>} />
+            <Route path="/profile" element={<ProfilePage/>} />
+            <Route path="/calendar" element={<CalendarPage/>} />
+            <Route path="/logout" element={<LogOutPage/>} />
+          </Route>
         </Routes>
     </div>  
   );
