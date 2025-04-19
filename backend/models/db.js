@@ -100,11 +100,17 @@ db.serialize(() => {
 
   db.run(addColumnSql, (err) => {
     if (err) {
-      console.error('Error adding column:', err.message);
+      // Check if the error message indicates the column already exists
+      if (err.message.includes('duplicate column name: residence')) {
+        console.log('Column "residence" already exists. Skipping ALTER TABLE.');
+      } else {
+        console.error('Error adding column:', err.message);
+      }
     } else {
       console.log('Column "residence" added successfully.');
     }
   });
+  
 });
 
 // Close the database connection
