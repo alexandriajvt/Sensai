@@ -34,6 +34,8 @@ function SignInDialogue() {
         console.error('Login failed:', data.error);
         return;
       }
+      // Ensure token is stored correctly
+    localStorage.setItem('authToken', data.token);
 
       const success = signIn({
         auth: { token: data.token, type: 'Bearer' },
@@ -48,6 +50,11 @@ function SignInDialogue() {
       if (success) {
         console.log('Login successful!');
         navigate('/calendar');
+
+        //testing
+        console.log("Auth Token from Backend:", data.token);
+        console.log("Stored Token in LocalStorage:", localStorage.getItem('authToken'));
+
       } else {
         console.error('SignIn failed');
       }
@@ -206,19 +213,28 @@ function SignInDialogue() {
               style={{ width: '100%', padding: '8px' }}
             >
               <option value="student">Student</option>
+              <option value="organizer">Event Organizer</option>
               <option value="admin">Admin</option>
-              <option value="faculty">Faculty</option>
             </select>
           </div>
 
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px' }}>Residence</label>
-            <input
+            <select
               type="text"
               value={residence}
               onChange={(e) => setResidence(e.target.value)}
               style={{ width: '100%', padding: '8px' }}
-            />
+            >
+              <option value="Alexander Hall">Alexander Hall</option>
+              <option value="Campbell College South">Campbell College South</option>
+              <option value="Transitional Hall">Transitional Hall</option>
+              <option value="Campbell College North">Campbell College North</option>
+              <option value="Dixon Hall">Dixon Hall</option>
+              <option value="University Place">University Place</option>
+              <option value="Stewart Hall">Stewart Hall</option>
+              <option value="Commuter">COMMUTER</option>
+            </select>
           </div>
 
           <button 

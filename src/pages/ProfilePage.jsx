@@ -1,10 +1,11 @@
 //Allows students to set up interests, dorms, and notifications
 import React from 'react';
-import useAuthUser from 'react-auth-kit';
+import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
 
 function ProfilePage(){
 
-  const authUser = useAuthUser();
+  const authUser = useAuthUser;
+  console.log("testing from Profile")
   console.log('Auth User:', authUser());
     return(
       <div className="profile">

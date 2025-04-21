@@ -7,6 +7,7 @@ import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import SignInPage from "./pages/SignInPage";
 import LogOutPage from "./pages/LogOutPage";
+import EventPage from './pages/EventPage';
 import MainNavBar from './components/Navbar';
 import {Routes, Route,} from "react-router-dom";
 //import RequireAuth from '@auth-kit/react-router/RequireAuth';
@@ -30,6 +31,7 @@ function App() {
             <Route path="/profile" element={<ProfilePage/>} />
             <Route path="/calendar" element={<CalendarPage/>} />
             <Route path="/logout" element={<LogOutPage/>} />
+            <Route path="/events" element={<EventPage/>} />
           </Route>
         </Routes>
     </div>  
