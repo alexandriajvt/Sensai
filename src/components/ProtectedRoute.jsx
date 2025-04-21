@@ -9,8 +9,7 @@ const ProtectedRoute = () => {
 
     const isAuthenticated = useIsAuthenticated();
 
-    console.log('Auth status:', isAuthenticated);//debugging/logging
-
+    //console.log('Auth status:', isAuthenticated);//debugging/logging
     
     return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace/>;
 

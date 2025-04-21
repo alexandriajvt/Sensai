@@ -34,6 +34,8 @@ function SignInDialogue() {
         console.error('Login failed:', data.error);
         return;
       }
+      // Ensure token is stored correctly
+    localStorage.setItem('authToken', data.token);
 
       const success = signIn({
         auth: { token: data.token, type: 'Bearer' },
@@ -48,6 +50,11 @@ function SignInDialogue() {
       if (success) {
         console.log('Login successful!');
         navigate('/calendar');
+
+        //testing
+        console.log("Auth Token from Backend:", data.token);
+        console.log("Stored Token in LocalStorage:", localStorage.getItem('authToken'));
+
       } else {
         console.error('SignIn failed');
       }
@@ -206,8 +213,8 @@ function SignInDialogue() {
               style={{ width: '100%', padding: '8px' }}
             >
               <option value="student">Student</option>
+              <option value="organizer">Event Organizer</option>
               <option value="admin">Admin</option>
-              <option value="faculty">Faculty</option>
             </select>
           </div>
 
