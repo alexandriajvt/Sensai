@@ -213,12 +213,21 @@ function SignInDialogue() {
 
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px' }}>Residence</label>
-            <input
+            <select
               type="text"
               value={residence}
               onChange={(e) => setResidence(e.target.value)}
               style={{ width: '100%', padding: '8px' }}
-            />
+            >
+              <option value="Alexander Hall">Alexander Hall</option>
+              <option value="Campbell College South">Campbell College South</option>
+              <option value="Transitional Hall">Transitional Hall</option>
+              <option value="Campbell College North">Campbell College North</option>
+              <option value="Dixon Hall">Dixon Hall</option>
+              <option value="University Place">University Place</option>
+              <option value="Stewart Hall">Stewart Hall</option>
+              <option value="Commuter">COMMUTER</option>
+            </select>
           </div>
 
           <button 
