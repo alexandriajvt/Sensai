@@ -1,6 +1,45 @@
 //Allows students to set up interests, dorms, and notifications
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ProfilePage.css';
+
+// Available interests categories
+const INTERESTS_CATEGORIES = {
+  academic: [
+    { id: 'research', label: 'Research Opportunities' },
+    { id: 'workshops', label: 'Academic Workshops' },
+    { id: 'tutoring', label: 'Tutoring Services' },
+    { id: 'study_groups', label: 'Study Groups' },
+    { id: 'honors', label: 'Honors Programs' }
+  ],
+  sports: [
+    { id: 'football', label: 'Football Games' },
+    { id: 'basketball', label: 'Basketball Games' },
+    { id: 'baseball', label: 'Baseball Games' },
+    { id: 'track', label: 'Track & Field' },
+    { id: 'intramural', label: 'Intramural Sports' }
+  ],
+  cultural: [
+    { id: 'art_exhibits', label: 'Art Exhibits' },
+    { id: 'music_events', label: 'Music Events' },
+    { id: 'dance', label: 'Dance Performances' },
+    { id: 'theater', label: 'Theater Productions' },
+    { id: 'cultural_festivals', label: 'Cultural Festivals' }
+  ],
+  career: [
+    { id: 'job_fairs', label: 'Job Fairs' },
+    { id: 'internships', label: 'Internship Opportunities' },
+    { id: 'resume_workshops', label: 'Resume Workshops' },
+    { id: 'networking', label: 'Networking Events' },
+    { id: 'career_counseling', label: 'Career Counseling' }
+  ],
+  social: [
+    { id: 'student_orgs', label: 'Student Organization Events' },
+    { id: 'greek_life', label: 'Greek Life Events' },
+    { id: 'campus_parties', label: 'Campus Parties' },
+    { id: 'movie_nights', label: 'Movie Nights' },
+    { id: 'game_nights', label: 'Game Nights' }
+  ]
+};
 
 function ProfilePage() {
   const [formData, setFormData] = useState({
@@ -21,6 +60,20 @@ function ProfilePage() {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedInterests, setSelectedInterests] = useState({});
+
+  // Load saved interests from localStorage on component mount
+  useEffect(() => {
+    const savedInterests = localStorage.getItem('userInterests');
+    if (savedInterests) {
+      setSelectedInterests(JSON.parse(savedInterests));
+    }
+  }, []);
+
+  // Save interests to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('userInterests', JSON.stringify(selectedInterests));
+  }, [selectedInterests]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,20 +101,23 @@ function ProfilePage() {
     }));
   };
 
-  const handleOrganizationChange = (e) => {
-    const orgs = Array.from(e.target.selectedOptions, option => option.value);
-    setFormData(prevState => ({
-      ...prevState,
-      organizations: orgs
+  const handleInterestChange = (category, interestId) => {
+    setSelectedInterests(prev => ({
+      ...prev,
+      [interestId]: !prev[interestId]
     }));
   };
 
-  const handleInterestChange = (e) => {
-    const interests = Array.from(e.target.selectedOptions, option => option.value);
-    setFormData(prevState => ({
-      ...prevState,
-      interests: interests
-    }));
+  const handleCategorySelect = (category) => {
+    const categoryInterests = INTERESTS_CATEGORIES[category];
+    const allSelected = categoryInterests.every(interest => selectedInterests[interest.id]);
+    
+    const newSelectedInterests = { ...selectedInterests };
+    categoryInterests.forEach(interest => {
+      newSelectedInterests[interest.id] = !allSelected;
+    });
+    
+    setSelectedInterests(newSelectedInterests);
   };
 
   const validateForm = () => {
@@ -97,9 +153,20 @@ function ProfilePage() {
     if (validateForm()) {
       setIsSubmitting(true);
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        console.log('Form submitted:', formData);
+        // Convert selectedInterests to an array of selected interest IDs
+        const selectedInterestIds = Object.entries(selectedInterests)
+          .filter(([_, isSelected]) => isSelected)
+          .map(([id]) => id);
+
+        const formDataWithInterests = {
+          ...formData,
+          interests: selectedInterestIds
+        };
+
+        // Save to localStorage as temporary storage
+        localStorage.setItem('userProfile', JSON.stringify(formDataWithInterests));
+        
+        console.log('Form submitted:', formDataWithInterests);
         alert('Profile updated successfully!');
       } catch (error) {
         console.error('Error submitting form:', error);
@@ -112,75 +179,75 @@ function ProfilePage() {
 
   return (
     <div className="profile-container">
-      <h1>JSU Student Profile</h1>
+      <h2>JSU Student Profile</h2>
       <form onSubmit={handleSubmit} className="profile-form">
         <section className="form-section">
-          <h2>Personal Information</h2>
+          <h3>Personal Information</h3>
           <div className="form-group">
-            <label htmlFor="name">Full Name</label>
+            <label>Full Name</label>
             <input
               type="text"
-              id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
               className={errors.name ? 'error' : ''}
+              required
             />
             {errors.name && <span className="error-message">{errors.name}</span>}
           </div>
 
           <div className="form-group">
-            <label htmlFor="schoolId">JSU ID</label>
+            <label>JSU ID</label>
             <input
               type="text"
-              id="schoolId"
               name="schoolId"
               value={formData.schoolId}
               onChange={handleChange}
               placeholder="J12345678"
               className={errors.schoolId ? 'error' : ''}
+              required
             />
             {errors.schoolId && <span className="error-message">{errors.schoolId}</span>}
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">JSU Email</label>
+            <label>JSU Email</label>
             <input
               type="email"
-              id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="username@jsums.edu"
               className={errors.email ? 'error' : ''}
+              required
             />
             {errors.email && <span className="error-message">{errors.email}</span>}
           </div>
         </section>
 
         <section className="form-section">
-          <h2>Academic Information</h2>
+          <h3>Academic Information</h3>
           <div className="form-group">
-            <label htmlFor="major">Major</label>
+            <label>Major</label>
             <input
               type="text"
-              id="major"
               name="major"
               value={formData.major}
               onChange={handleChange}
               className={errors.major ? 'error' : ''}
+              required
             />
             {errors.major && <span className="error-message">{errors.major}</span>}
           </div>
 
           <div className="form-group">
-            <label htmlFor="classification">Classification</label>
+            <label>Classification</label>
             <select
-              id="classification"
               name="classification"
               value={formData.classification}
               onChange={handleChange}
               className={errors.classification ? 'error' : ''}
+              required
             >
               <option value="">Select Classification</option>
               <option value="freshman">Freshman</option>
@@ -193,25 +260,24 @@ function ProfilePage() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="expectedGraduation">Expected Graduation</label>
+            <label>Expected Graduation</label>
             <input
               type="month"
-              id="expectedGraduation"
               name="expectedGraduation"
               value={formData.expectedGraduation}
               onChange={handleChange}
               className={errors.expectedGraduation ? 'error' : ''}
+              required
             />
             {errors.expectedGraduation && <span className="error-message">{errors.expectedGraduation}</span>}
           </div>
         </section>
 
         <section className="form-section">
-          <h2>Housing Information</h2>
+          <h3>Housing Information</h3>
           <div className="form-group">
-            <label htmlFor="dorm">Residence Hall</label>
+            <label>Residence Hall</label>
             <select
-              id="dorm"
               name="dorm"
               value={formData.dorm}
               onChange={handleChange}
@@ -226,53 +292,39 @@ function ProfilePage() {
         </section>
 
         <section className="form-section">
-          <h2>Organizations & Interests</h2>
-          <div className="form-group">
-            <label htmlFor="organizations">Organizations of Interest</label>
-            <select
-              multiple
-              id="organizations"
-              name="organizations"
-              value={formData.organizations}
-              onChange={handleOrganizationChange}
-              className="organizations-select"
-            >
-              <option value="academic">Academic Clubs</option>
-              <option value="sports">Sports Teams</option>
-              <option value="cultural">Cultural Organizations</option>
-              <option value="greek">Greek Life</option>
-              <option value="service">Service Organizations</option>
-              <option value="religious">Religious Groups</option>
-              <option value="political">Political Groups</option>
-              <option value="professional">Professional Organizations</option>
-            </select>
-            <small className="help-text">Hold Ctrl/Cmd to select multiple organizations</small>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="interests">Areas of Interest</label>
-            <select
-              multiple
-              id="interests"
-              name="interests"
-              value={formData.interests}
-              onChange={handleInterestChange}
-              className="organizations-select"
-            >
-              <option value="academic">Academic Events</option>
-              <option value="sports">Sports Events</option>
-              <option value="cultural">Cultural Events</option>
-              <option value="social">Social Events</option>
-              <option value="career">Career Development</option>
-              <option value="community">Community Service</option>
-              <option value="entertainment">Entertainment</option>
-            </select>
-            <small className="help-text">Hold Ctrl/Cmd to select multiple interests</small>
+          <h3>Interests & Events</h3>
+          <div className="interests-container">
+            {Object.entries(INTERESTS_CATEGORIES).map(([category, interests]) => (
+              <div key={category} className="interest-category">
+                <div className="category-header">
+                  <h4>{category.charAt(0).toUpperCase() + category.slice(1)} Events</h4>
+                  <button
+                    type="button"
+                    className="select-all-button"
+                    onClick={() => handleCategorySelect(category)}
+                  >
+                    Select All
+                  </button>
+                </div>
+                <div className="interests-grid">
+                  {interests.map(interest => (
+                    <label key={interest.id} className="interest-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={selectedInterests[interest.id] || false}
+                        onChange={() => handleInterestChange(category, interest.id)}
+                      />
+                      <span>{interest.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
         <section className="form-section">
-          <h2>Notification Preferences</h2>
+          <h3>Notification Preferences</h3>
           <div className="notification-preferences">
             <label className="checkbox-label">
               <input
