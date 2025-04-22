@@ -1,3 +1,4 @@
+// CalendarPage.jsx
 import React from 'react';
 import Calendar from '../../my-app/src/components/Calendar';
 //import EventList from '../components/EventList';
@@ -12,16 +13,11 @@ const events = [
 
 function CalendarPage() {
   return (
-    <div className="calendar-page">
-      <h1>Event Calendar</h1>
-      {/* <ul>
-        {events.map(event => (
-          <li key={event.id}>
-            <Link to={`/event/${event.id}`}>{event.name} - {event.date}</Link>
-          </li>
-        ))}
-      </ul> */}
+    <div>
+      <h1 style={{ textAlign: 'center' }}>My Calendar</h1>
+      <CalendarComponent events={events} />
     </div>
   );
-}
+};
+
 export default CalendarPage;
