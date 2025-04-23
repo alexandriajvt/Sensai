@@ -29,11 +29,7 @@ function MainNavBar() {
             <NavDropdown title="Me" id="basic-nav-dropdown">
               <NavDropdown.Item as={Link} to ="/profile">Profile</NavDropdown.Item>
               <NavDropdown.Divider />
-              <NavDropdown.Item as={Link} to="/events">Schedule an Event </NavDropdown.Item>
-              <NavDropdown.Divider />
               <NavDropdown.Item as={Link} to="/settings">Settings </NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item as={Link} to="/logout">Log Out </NavDropdown.Item>
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>

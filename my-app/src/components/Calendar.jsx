@@ -1,24 +1,15 @@
 //Displays events in a calendar format
 import React from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css'; // Import the default CSS
 
-const localizer = momentLocalizer(moment);
-
-const CalendarComponent = ({ events }) => {
-
+const Calendar = () => {
+  console.log('Calendar component is rendering')
   return (
-    <div style={{ height: '80vh', padding: '20px' }}>
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: '80vh' }}
-      />
+    <div className="calendar">
+      <h2>Calendar Component</h2>
+      <p>This will be the calendar view.</p>
+      {/* Add your calendar logic here */}
     </div>
   );
 };
 
-export default CalendarComponent;
+export default Calendar;
