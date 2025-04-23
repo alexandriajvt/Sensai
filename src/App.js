@@ -13,7 +13,7 @@ import {Routes, Route,} from "react-router-dom";
 //import RequireAuth from '@auth-kit/react-router/RequireAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 
-//trying to fix the program
+
 function App() {
   return (
     <div> 
