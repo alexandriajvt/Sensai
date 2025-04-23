@@ -8,7 +8,7 @@ import SettingsPage from './SettingsPage';
 import HomePage from './HomePage';
 import MainNavBar from './components/Navbar';
 import { Routes, Route } from "react-router-dom";
-
+import ''
 
 console.log('App component is rendering');
 console.log("App is rendering. Current route:", window.location.pathname);

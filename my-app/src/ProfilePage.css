@@ -1,22 +1,22 @@
 .profile-container {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 20px;
-  background: #ffffff;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
   border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.profile-container h2 {
+.profile-container h1 {
+  color: #1a237e;
   text-align: center;
-  font-size: 22px;
-  margin-bottom: 15px;
-  color: #333;
+  margin-bottom: 2rem;
+  font-size: 2rem;
 }
 
 .form-section {
-  margin-bottom: 20px;
-  padding-bottom: 20px;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid #eee;
 }
 
@@ -24,159 +24,105 @@
   border-bottom: none;
 }
 
-.form-section h3 {
-  font-size: 18px;
-  margin-bottom: 15px;
-  color: #333;
+.form-section h2 {
+  color: #1a237e;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #1a237e;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .form-group label {
-  display: block;
-  margin-bottom: 5px;
-  color: #555;
-  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
 }
 
 .form-group input,
 .form-group select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 14px;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
   transition: border-color 0.3s ease;
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #1a237e;
+  box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.1);
 }
 
 .form-group input.error,
 .form-group select.error {
-  border-color: #f44336;
+  border-color: #d32f2f;
 }
 
 .error-message {
-  color: #f44336;
-  font-size: 12px;
-  margin-top: 5px;
+  color: #d32f2f;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 
-.interests-container {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+.organizations-select {
+  min-height: 120px;
 }
 
-.interest-category {
-  background-color: #f8f9fa;
-  padding: 15px;
-  border-radius: 5px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.category-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.category-header h4 {
-  margin: 0;
-  font-size: 16px;
-  color: #333;
-}
-
-.select-all-button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.select-all-button:hover {
-  background-color: #45a049;
-}
-
-.interests-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px;
-}
-
-.interest-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-  cursor: pointer;
-}
-
-.interest-checkbox:hover {
-  background-color: rgba(76, 175, 80, 0.05);
-}
-
-.interest-checkbox input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-.interest-checkbox span {
-  font-size: 14px;
-  color: #333;
+.help-text {
+  color: #666;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 
 .notification-preferences {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 1rem;
 }
 
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
   cursor: pointer;
   user-select: none;
-  font-size: 14px;
-  color: #555;
 }
 
 .checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  width: 1.2rem;
+  height: 1.2rem;
   cursor: pointer;
 }
 
 .submit-button {
-  width: 100%;
-  padding: 12px;
-  background-color: #4CAF50;
+  background-color: #1a237e;
   color: white;
+  padding: 1rem 2rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 16px;
   transition: all 0.3s ease;
-  margin-top: 20px;
+  margin-top: 1rem;
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: #45a049;
+  background-color: #283593;
   transform: translateY(-1px);
 }
 
@@ -185,27 +131,21 @@
 }
 
 .submit-button:disabled {
-  background-color: #cccccc;
+  background-color: #9fa8da;
   cursor: not-allowed;
 }
 
 @media (max-width: 600px) {
   .profile-container {
-    margin: 10px;
-    padding: 15px;
+    margin: 1rem;
+    padding: 1rem;
   }
 
-  .interests-grid {
-    grid-template-columns: 1fr;
+  .profile-container h1 {
+    font-size: 1.5rem;
   }
 
-  .category-header {
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-start;
-  }
-
-  .select-all-button {
-    width: 100%;
+  .form-section h2 {
+    font-size: 1.25rem;
   }
 } 
