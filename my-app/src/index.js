@@ -4,16 +4,44 @@ import './index.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
+<<<<<<< HEAD
 import 'bootstrap/dist/css/bootstrap.min.css';
+=======
+import AuthProvider from "react-auth-kit";
+import createStore from 'react-auth-kit/createStore';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+
+const authStore = createStore({
+  authName: '_auth',       // Cookie name (default: `_auth`)
+  authType: 'cookie',      // Storage type (`cookie` or `localstorage`)
+  cookieDomain: window.location.hostname,
+  cookieSecure: false,     // `true` for HTTPS-only in production
+});
+
+
+console.log('Auth store created:', authStore); // Should log an object
+>>>>>>> alexDev
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
+<<<<<<< HEAD
     <BrowserRouter>
       <App />
     </BrowserRouter>
   </React.StrictMode>
+=======
+    <AuthProvider store = {authStore}>
+      <BrowserRouter>
+          <App />
+       </BrowserRouter>
+    </AuthProvider>
+</React.StrictMode>
+>>>>>>> alexDev
 );
+
+
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
