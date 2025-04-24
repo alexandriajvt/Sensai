@@ -5,7 +5,7 @@ import Container from 'react-bootstrap/Container'
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
 import NavDropdown from 'react-bootstrap/NavDropdown'
-import logo from '../Sensei_Logo.png' // Replace with your logo's path
+import logo from '/Users/kumuluvv/sensai-react-frame/my-app/src/Sensei Logo.png' // Replace with your logo's path
 //import './Navbar.css';
 
 
@@ -18,7 +18,7 @@ function MainNavBar() {
             src={logo}
             width="75"
             height="75"
-            alt="Sensei Logo"
+            alt="Snpm installensei Logo"
           />
         </Navbar.Brand> 
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -29,7 +29,11 @@ function MainNavBar() {
             <NavDropdown title="Me" id="basic-nav-dropdown">
               <NavDropdown.Item as={Link} to ="/profile">Profile</NavDropdown.Item>
               <NavDropdown.Divider />
+              <NavDropdown.Item as={Link} to="/events">Schedule an Event </NavDropdown.Item>
+              <NavDropdown.Divider />
               <NavDropdown.Item as={Link} to="/settings">Settings </NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item as={Link} to="/logout">Log Out </NavDropdown.Item>
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>
