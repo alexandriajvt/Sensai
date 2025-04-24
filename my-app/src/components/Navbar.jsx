@@ -5,7 +5,7 @@ import Container from 'react-bootstrap/Container'
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
 import NavDropdown from 'react-bootstrap/NavDropdown'
-import logo from '/Users/kumuluvv/sensai-react-frame/src/Sensei Logo.png' // Replace with your logo's path
+import logo from '/Users/kumuluvv/sensai-react-frame/my-app/src/Sensei Logo.png' // Replace with your logo's path
 //import './Navbar.css';
 
 
@@ -18,7 +18,7 @@ function MainNavBar() {
             src={logo}
             width="75"
             height="75"
-            alt="Sensei Logo"
+            alt="Snpm installensei Logo"
           />
         </Navbar.Brand> 
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
