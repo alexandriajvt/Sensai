@@ -34,6 +34,15 @@ app.use('/api/users', userRoutes);
 const eventRoutes = require('./routes/events.routes');
 app.use('/api/events', eventRoutes);
 
+
+const categoriesRoutes = require('./routes/categories.routes');
+app.use('/api/categories', categoriesRoutes);
+
+
+const rsvpRoutes = require('./routes/rsvp.routes');
+app.use('/api/rsvp', rsvpRoutes);
+
+
 // Error-handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

@@ -1,47 +1,56 @@
+// controllers/user.controller.js
 const db = require('../models/db');
 
 exports.getUserInfo = (req, res, next) => {
-  // Parse the requested user ID from the URL parameters.
   const requestedUserId = parseInt(req.params.id, 10);
-  const loggedInUser = req.user; // Set by your authentication middleware
+  const loggedInUser    = req.user;
 
-  // Authorization check: allow if the logged in user is retrieving their own info or is an admin.
+  // Authorization
   if (loggedInUser.id !== requestedUserId && loggedInUser.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied.' });
   }
 
-  // SQL to select the user information.
-  const sql = `
-    SELECT id, name, email, student_id, major, classification, role, created_at, residence 
-    FROM users 
-    WHERE id = ?
+  // 1) Fetch core user profile
+  const sqlUser = `
+    SELECT id, name, email, student_id, major, classification, role, created_at, residence
+      FROM users
+     WHERE id = ?
   `;
+  db.get(sqlUser, [requestedUserId], (err, userRow) => {
+    if (err) return next(err);
+    if (!userRow) return res.status(404).json({ error: 'User not found.' });
 
-  // Use db.get to retrieve a single record matching the requested user ID.
-  db.get(sql, [requestedUserId], (err, row) => {
-    if (err) {
-      return next(err);
-    }
+    // 2) Fetch the user’s interests
+    const sqlInts = `
+      SELECT i.id, i.name
+        FROM interests i
+        JOIN user_interests ui ON ui.interest_id = i.id
+       WHERE ui.user_id = ?
+       ORDER BY i.name
+    `;
+    db.all(sqlInts, [requestedUserId], (intErr, interests) => {
+      if (intErr) return next(intErr);
 
-    if (!row) {
-      return res.status(404).json({ error: 'User not found.' });
-    }
-
-    res.status(200).json(row);
+      // 3) Respond with profile + interests
+      res.json({
+        ...userRow,
+        interests   // array of { id, name }
+      });
+    });
   });
 };
 
 
 exports.updateUser = (req, res, next) => {
   const requestedUserId = parseInt(req.params.id, 10);
-  const loggedInUser = req.user; // set by authenticateToken
+  const loggedInUser    = req.user;
 
-  // Authorization check: user can update themselves, or admins can update anyone
+  // Authorization
   if (loggedInUser.id !== requestedUserId && loggedInUser.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied.' });
   }
 
-  // Extract fields from body
+  // 1) Update core profile fields
   const {
     name,
     email,
@@ -49,10 +58,11 @@ exports.updateUser = (req, res, next) => {
     major,
     classification,
     role,
-    residence
+    residence,
+    interestIds    // expect an array of interest IDs, or undefined
   } = req.body;
 
-  const sql = `
+  const sqlUpdate = `
     UPDATE users
        SET name           = COALESCE(?, name),
            email          = COALESCE(?, email),
@@ -63,38 +73,69 @@ exports.updateUser = (req, res, next) => {
            residence      = COALESCE(?, residence)
      WHERE id = ?
   `;
-
   const params = [
-    name,
-    email,
-    student_id,
-    major,
-    classification,
-    role,
-    residence,
+    name, email, student_id, major, classification, role, residence,
     requestedUserId
   ];
 
-  db.run(sql, params, function(err) {
-    if (err) {
-      return next(err);
-    }
+  db.run(sqlUpdate, params, function(err) {
+    if (err) return next(err);
     if (this.changes === 0) {
-      // No rows updated: user not found
       return res.status(404).json({ error: 'User not found.' });
     }
-    // Fetch the updated user to return in response
-    db.get(
-      `SELECT id, name, email, student_id, major, classification, residence, role, created_at
-         FROM users
-        WHERE id = ?`,
-      [requestedUserId],
-      (err2, row) => {
-        if (err2) {
-          return next(err2);
-        }
-        res.json({ message: 'User updated successfully.', user: row });
+
+    // 2) If client provided interestIds array, replace the user’s tags
+    if (Array.isArray(interestIds)) {
+      db.serialize(() => {
+        // a) Remove existing links
+        db.run(
+          `DELETE FROM user_interests WHERE user_id = ?`,
+          [requestedUserId]
+        );
+
+        // b) Insert new ones
+        const stmt = db.prepare(
+          `INSERT INTO user_interests (user_id, interest_id) VALUES (?, ?)`
+        );
+        interestIds.forEach(iid => stmt.run(requestedUserId, iid));
+        stmt.finalize();
+      });
+    }
+
+    // 3) Fetch the updated profile + interests to return
+    const sqlFetch = `
+      SELECT u.id, u.name, u.email, u.student_id, u.major,
+             u.classification, u.role, u.residence, u.created_at,
+             i.id   AS interest_id,
+             i.name AS interest_name
+        FROM users u
+   LEFT JOIN user_interests ui ON ui.user_id = u.id
+   LEFT JOIN interests     i  ON i.id = ui.interest_id
+       WHERE u.id = ?
+    `;
+    db.all(sqlFetch, [requestedUserId], (fetchErr, rows) => {
+      if (fetchErr) return next(fetchErr);
+
+      if (rows.length === 0) {
+        // Shouldn't happen—we just updated it—but guard anyway
+        return res.status(404).json({ error: 'User not found.' });
       }
-    );
+
+      // rows looks like:
+      // [ { id, name, ..., interest_id: 3, interest_name: 'Party' },
+      //   { id, name, ..., interest_id: 7, interest_name: 'Networking' },
+      //   ... ]
+      // We’ll collapse it into one profile + interests array:
+
+      const { interest_id, interest_name, ...base } = rows[0];
+      const interests = rows
+        .filter(r => r.interest_id != null)
+        .map(r => ({ id: r.interest_id, name: r.interest_name }));
+
+      res.json({
+        message: 'User updated successfully.',
+        user: { ...base, interests }
+      });
+    });
   });
 };
