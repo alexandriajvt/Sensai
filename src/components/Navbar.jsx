@@ -5,7 +5,7 @@ import Container from 'react-bootstrap/Container'
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
 import NavDropdown from 'react-bootstrap/NavDropdown'
-import logo from '../Sensei_Logo.png' // Replace with your logo's path
+import logo from '/Users/kumuluvv/sensai-react-frame/src/Sensei Logo.png' // Replace with your logo's path
 //import './Navbar.css';
 
 
