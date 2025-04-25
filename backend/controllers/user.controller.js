@@ -1,4 +1,5 @@
-// controllers/user.controller.js
+//user.controller.js
+
 const db = require('../models/db');
 
 exports.getUserInfo = (req, res, next) => {
@@ -40,17 +41,14 @@ exports.getUserInfo = (req, res, next) => {
   });
 };
 
-
 exports.updateUser = (req, res, next) => {
   const requestedUserId = parseInt(req.params.id, 10);
-  const loggedInUser    = req.user;
+  const loggedInUser = req.user;
 
-  // Authorization
   if (loggedInUser.id !== requestedUserId && loggedInUser.role !== 'admin') {
     return res.status(403).json({ error: 'Access denied.' });
   }
 
-  // 1) Update core profile fields
   const {
     name,
     email,
@@ -59,7 +57,7 @@ exports.updateUser = (req, res, next) => {
     classification,
     role,
     residence,
-    interestIds    // expect an array of interest IDs, or undefined
+    interestIds // array of selected interest IDs from checkboxes
   } = req.body;
 
   const sqlUpdate = `
@@ -83,59 +81,65 @@ exports.updateUser = (req, res, next) => {
     if (this.changes === 0) {
       return res.status(404).json({ error: 'User not found.' });
     }
-
-    // 2) If client provided interestIds array, replace the user’s tags
-    if (Array.isArray(interestIds)) {
-      db.serialize(() => {
-        // a) Remove existing links
+//db.serialize allows updates from the user profile
+    db.serialize(() => {
+      // Only update interests if `interestIds` was provided
+      if (Array.isArray(interestIds)) {
         db.run(
           `DELETE FROM user_interests WHERE user_id = ?`,
-          [requestedUserId]
-        );
+          [requestedUserId],
+          (delErr) => {
+            if (delErr) return next(delErr);
 
-        // b) Insert new ones
-        const stmt = db.prepare(
-          `INSERT INTO user_interests (user_id, interest_id) VALUES (?, ?)`
+            if (interestIds.length > 0) {
+              const stmt = db.prepare(
+                `INSERT INTO user_interests (user_id, interest_id) VALUES (?, ?)`
+              );
+
+              interestIds.forEach(iid => {
+                stmt.run(requestedUserId, iid);
+              });
+
+              stmt.finalize(fetchUpdatedUser);
+            } else {
+              // If no interests to add, still fetch updated profile
+              fetchUpdatedUser();
+            }
+          }
         );
-        interestIds.forEach(iid => stmt.run(requestedUserId, iid));
-        stmt.finalize();
+      } else {
+        fetchUpdatedUser(); // Skip interest update, just fetch user
+      }
+    });
+
+    function fetchUpdatedUser() {
+      const sqlFetch = `
+        SELECT u.id, u.name, u.email, u.student_id, u.major,
+               u.classification, u.role, u.residence, u.created_at,
+               i.id   AS interest_id,
+               i.name AS interest_name
+          FROM users u
+     LEFT JOIN user_interests ui ON ui.user_id = u.id
+     LEFT JOIN interests     i  ON i.id = ui.interest_id
+         WHERE u.id = ?
+      `;
+
+      db.all(sqlFetch, [requestedUserId], (fetchErr, rows) => {
+        if (fetchErr) return next(fetchErr);
+        if (rows.length === 0) {
+          return res.status(404).json({ error: 'User not found.' });
+        }
+
+        const { interest_id, interest_name, ...base } = rows[0];
+        const interests = rows
+          .filter(r => r.interest_id != null)
+          .map(r => ({ id: r.interest_id, name: r.interest_name }));
+
+        res.json({
+          message: 'User updated successfully.',
+          user: { ...base, interests }
+        });
       });
     }
-
-    // 3) Fetch the updated profile + interests to return
-    const sqlFetch = `
-      SELECT u.id, u.name, u.email, u.student_id, u.major,
-             u.classification, u.role, u.residence, u.created_at,
-             i.id   AS interest_id,
-             i.name AS interest_name
-        FROM users u
-   LEFT JOIN user_interests ui ON ui.user_id = u.id
-   LEFT JOIN interests     i  ON i.id = ui.interest_id
-       WHERE u.id = ?
-    `;
-    db.all(sqlFetch, [requestedUserId], (fetchErr, rows) => {
-      if (fetchErr) return next(fetchErr);
-
-      if (rows.length === 0) {
-        // Shouldn't happen—we just updated it—but guard anyway
-        return res.status(404).json({ error: 'User not found.' });
-      }
-
-      // rows looks like:
-      // [ { id, name, ..., interest_id: 3, interest_name: 'Party' },
-      //   { id, name, ..., interest_id: 7, interest_name: 'Networking' },
-      //   ... ]
-      // We’ll collapse it into one profile + interests array:
-
-      const { interest_id, interest_name, ...base } = rows[0];
-      const interests = rows
-        .filter(r => r.interest_id != null)
-        .map(r => ({ id: r.interest_id, name: r.interest_name }));
-
-      res.json({
-        message: 'User updated successfully.',
-        user: { ...base, interests }
-      });
-    });
   });
 };

@@ -207,7 +207,15 @@ exports.getMatchedEvents = (req, res, next) => {
     `;
   
     db.all(sql, [userId], (err, events) => {
-      if (err) return next(err);
+      if (err) {
+        console.error("Database error:", err);
+        return res.status(500).json({ error: "Failed to fetch events." });
+      }
+  
+      if (!events || events.length === 0) {
+        return res.json({ events: [] }); //  Prevents frontend errors when no events exist
+      }
+  
       res.json({ events });
     });
   };
