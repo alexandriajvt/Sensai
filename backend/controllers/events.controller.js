@@ -2,6 +2,7 @@
 const db = require('../models/db');
 
 exports.createEvent = (req, res, next) => {
+  console.log("Decoded user in request:", req.user);//debugging
   const organizerId = req.user.id;  // set by authenticateToken
   const {
     title,
@@ -207,7 +208,15 @@ exports.getMatchedEvents = (req, res, next) => {
     `;
   
     db.all(sql, [userId], (err, events) => {
-      if (err) return next(err);
+      if (err) {
+        console.error("Database error:", err);
+        return res.status(500).json({ error: "Failed to fetch events." });
+      }
+  
+      if (!events || events.length === 0) {
+        return res.json({ events: [] }); //  Prevents frontend errors when no events exist
+      }
+  
       res.json({ events });
     });
   };

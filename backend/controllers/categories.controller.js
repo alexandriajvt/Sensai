@@ -29,4 +29,17 @@ exports.listByCategory = (req, res, next) => {
       res.json(rows); // will be [] if none found
     });
   };
+
+  exports.listInterests = (req, res, next) => {
+    db.all(
+      `SELECT id, name FROM interests ORDER BY name;`,
+      (err, rows) => {
+        if (err) {
+          console.error("Error fetching interests:", err);
+          return next(err);
+        }
+        res.json(rows);
+      }
+    );
+  };
   
