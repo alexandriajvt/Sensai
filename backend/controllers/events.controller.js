@@ -2,6 +2,7 @@
 const db = require('../models/db');
 
 exports.createEvent = (req, res, next) => {
+  console.log("Decoded user in request:", req.user);//debugging
   const organizerId = req.user.id;  // set by authenticateToken
   const {
     title,
