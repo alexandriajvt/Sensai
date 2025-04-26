@@ -1,6 +1,9 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
+//app.js
+const express = require('express'); // Express framework
+const dotenv = require('dotenv');  // Environment variable management
+const cors = require('cors');      // Cross-Origin Resource Sharing middleware
+
+
 
 // Load environment variables
 dotenv.config();
@@ -17,10 +20,8 @@ app.get('/', (req, res) => {
   res.send('Sensei backend is running!');
 });
 
-console.log('Sensei backend is running!')
-// Import your routes
 
-
+// Import  routes
 const authRoutes = require('./routes/auth.routes');
 app.use('/api/auth', authRoutes);
 

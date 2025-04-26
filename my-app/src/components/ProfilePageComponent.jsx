@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+//ProfilePageComponent.jsx
+import React, { useState, useEffect } from 'react';
 
 const styles = {
   container: {
@@ -76,65 +77,99 @@ const styles = {
 };
 
 // Example fixed list of interests (could later fetch dynamically from backend)
-const availableInterests = [
-  'Programming',
-  'Music',
-  'Sports',
-  'Art',
-  'Networking',
-  'Gaming',
-  'Volunteering'
-];
+// const availableInterests = [
+//   'Programming',
+//   'Music',
+//   'Sports',
+//   'Art',
+//   'Networking',
+//   'Gaming',
+//   'Volunteering'
+// ];
 
-function ProfilePageComponent() {
+function ProfilePageComponent({ authUserId }) {
   const [name, setName] = useState('');
   const [jNumber, setJNumber] = useState('');
   const [major, setMajor] = useState('');
-  const [selectedInterests, setSelectedInterests] = useState([]);
+  const [interests, setInterests] = useState([]); // Interests fetched from backend
+  //const [selectedInterests, setSelectedInterests] = useState([]); // Selected interests
 
-  const handleCheckboxChange = (interest) => {
-    setSelectedInterests((prev) =>
-      prev.includes(interest)
-        ? prev.filter((i) => i !== interest)  // Remove if already selected
-        : [...prev, interest]                 // Add if not selected
+  // Fetch available interests and user's current selections from backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('authToken'); // Ensure token exists
+        const interestsResponse = await fetch('http://localhost:5001/api/categories/interests', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const userResponse = await fetch(`http://localhost:5001/api/users/${authUserId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const interestsData = await interestsResponse.json();
+        const userData = await userResponse.json();
+
+        setInterests(
+          interestsData.map(interest => ({
+            id: interest.id,
+            name: interest.name,
+            isSelected: userData.interests.some(i => i.id === interest.id) // Pre-select interests
+          }))
+        );
+      } catch (error) {
+        console.error('Failed to fetch interests or user info:', error);
+      }
+    };
+
+    fetchData();
+  }, [authUserId]);
+
+  const handleInterestToggle = (id) => {
+    setInterests(prev =>
+      prev.map(interest => interest.id === id
+        ? { ...interest, isSelected: !interest.isSelected }
+        : interest
+      )
     );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token'); // Assuming token is stored there
 
-    const interestsPayload = selectedInterests.map((i) => i.toLowerCase());
+    const selectedInterestIds = interests
+      .filter(interest => interest.isSelected)
+      .map(interest => interest.id);
 
     try {
-      await fetch('http://localhost:5001/api/users/interests', {
-        method: 'POST',
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:5001/api/users/${authUserId}/interests`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ interests: interestsPayload })
+        body: JSON.stringify({ interestIds: selectedInterestIds })
       });
 
-      alert('Profile updated successfully!');
-    } catch (err) {
-      console.error(err);
-      alert('Failed to update profile.');
+      const data = await response.json();
+      if (response.ok) {
+        alert('Interests saved successfully!');
+      } else {
+        alert(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error saving interests:', error);
+      alert('Failed to save interests.');
     }
   };
-
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>Welcome to your Profile Page</h1>
-      <p style={{ textAlign: 'center' }}>
-        Here you can enter basic details and your interests.
-      </p>
       <form style={styles.form} onSubmit={handleSubmit}>
         <div style={styles.group}>
           <label style={styles.label}>Name</label>
           <input
             type="text"
-            style={styles.input}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter your name"
@@ -144,7 +179,6 @@ function ProfilePageComponent() {
           <label style={styles.label}>J Number</label>
           <input
             type="text"
-            style={styles.input}
             value={jNumber}
             onChange={(e) => setJNumber(e.target.value)}
             placeholder="J00123456"
@@ -154,7 +188,6 @@ function ProfilePageComponent() {
           <label style={styles.label}>Major</label>
           <input
             type="text"
-            style={styles.input}
             value={major}
             onChange={(e) => setMajor(e.target.value)}
             placeholder="Your major"
@@ -163,14 +196,14 @@ function ProfilePageComponent() {
         <div style={styles.group}>
           <label style={styles.label}>Select Your Interests</label>
           <div style={styles.checkboxGroup}>
-            {availableInterests.map((interest) => (
-              <label key={interest} style={styles.checkboxLabel}>
+            {interests.map(interest => (
+              <label key={interest.id}>
                 <input
                   type="checkbox"
-                  checked={selectedInterests.includes(interest)}
-                  onChange={() => handleCheckboxChange(interest)}
+                  checked={interest.isSelected}
+                  onChange={() => handleInterestToggle(interest.id)}
                 />
-                {interest}
+                {interest.name}
               </label>
             ))}
           </div>

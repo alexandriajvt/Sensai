@@ -19,6 +19,11 @@ router.put(
     authorize(['organizer','admin']),
     eventsController.updateEvent
 );
+router.get(
+  '/matchedEvents',
+  authenticateToken,
+  eventsController.getMatchedEvents
+);
 
 router.get(
     '/:id',
@@ -26,11 +31,6 @@ router.get(
     eventsController.getEventDetails
   );
   
-router.get(
-    '/matched',
-    authenticateToken,
-    eventsController.getMatchedEvents
-);
 
 router.delete(
     '/:id',

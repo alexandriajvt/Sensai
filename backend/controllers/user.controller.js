@@ -143,3 +143,38 @@ exports.updateUser = (req, res, next) => {
     }
   });
 };
+
+
+exports.updateUserInterests = (req, res, next) => {
+  const requestedUserId = parseInt(req.params.id, 10);
+  const loggedInUser = req.user;
+
+  // Authorization: Ensure user is allowed to update their own interests or is an admin
+  if (loggedInUser.id !== requestedUserId && loggedInUser.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied.' });
+  }
+
+  const { interestIds } = req.body; // Extract selected interest IDs from request body
+
+  if (!Array.isArray(interestIds)) {
+    return res.status(400).json({ error: 'Invalid interests format.' });
+  }
+
+  // Start transaction to update user interests
+  db.run(`DELETE FROM user_interests WHERE user_id = ?`, [requestedUserId], (delErr) => {
+    if (delErr) return next(delErr);
+
+    if (interestIds.length > 0) {
+      const stmt = db.prepare(`INSERT INTO user_interests (user_id, interest_id) VALUES (?, ?)`);
+      interestIds.forEach((interestId) => {
+        stmt.run(requestedUserId, interestId);
+      });
+      stmt.finalize((err) => {
+        if (err) return next(err);
+        res.json({ message: 'User interests updated successfully.' });
+      });
+    } else {
+      res.json({ message: 'User interests cleared successfully.' });
+    }
+  });
+};

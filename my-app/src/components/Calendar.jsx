@@ -16,21 +16,19 @@ const CalendarComponent = () => {
         const token = localStorage.getItem('authToken');
         if (!token) throw new Error('No authentication token found. Please log in.');
 
-        const response = await fetch('http://localhost:5001/api/events/matched', {
+        const response = await fetch('http://localhost:5001/api/events/matchedEvents', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
-        })
-        .then(response => response.json())
-        .then(data => console.log('Fetched Events:', data))
-        .catch(error => console.error('Fetch error:', error));;
+        });
 
-        console.log('Raw response:', response); // Log full response object
 
-        if (response.status === 403) throw new Error('Access forbidden. Please check your login session.');
-        if (!response.ok) throw new Error(`Failed to fetch events: ${response.statusText}`);
-
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({})); // Safely parse error response
+        console.error("Backend error:", errorData);
+        throw new Error(errorData.error || response.statusText || 'Failed to fetch events.');
+      }
         const eventData = await response.json();
         console.log('Fetched event data:', eventData); // Log parsed JSON 
 
@@ -50,6 +48,7 @@ const CalendarComponent = () => {
         setEvents(formattedEvents);
       } catch (err) {
         setError(err.message);
+        console.error("Fetch Events Error:", err); // Log the exact error
       } finally {
         setLoading(false);
       }
