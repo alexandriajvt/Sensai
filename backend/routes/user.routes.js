@@ -8,6 +8,6 @@ const authenticateToken = require('../middleware/auth.middleware');
 router.get('/:id', authenticateToken, userController.getUserInfo);
 
 router.put('/:id', authenticateToken, userController.updateUser);
-  
+router.put('/:id/interests', authenticateToken, userController.updateUserInterests);  
 
 module.exports = router;
