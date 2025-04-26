@@ -56,6 +56,9 @@ exports.createEvent = (req, res, next) => {
   });
 };
 
+
+
+
 exports.updateEvent = (req, res, next) => {
     const eventId = parseInt(req.params.id, 10);
     const user    = req.user; // set by authenticateToken
@@ -147,7 +150,10 @@ exports.updateEvent = (req, res, next) => {
     );
 };
 
+
 exports.getEventDetails = (req, res, next) => {
+  console.log("EventDetails route triggered with eventId:", req.params.id);
+
   const eventId = parseInt(req.params.id, 10);
   if (isNaN(eventId)) {
     return res.status(400).json({ error: 'Invalid event ID.' });
@@ -187,9 +193,19 @@ exports.getEventDetails = (req, res, next) => {
   });
 };
 
+
+
+
 exports.getMatchedEvents = (req, res, next) => {
-    const userId = req.user.id;  // set by authenticateToken
-  
+  console.log("MatchedEvents route triggered"); 
+
+    
+  const userId = req.user.id;  // set by authenticateToken
+  if (!userId) {
+    console.error("Error: User ID is undefined.");
+    return res.status(400).json({ error: "Invalid or missing user ID." });
+  }
+
     const sql = `
       SELECT DISTINCT
         e.id,
@@ -203,11 +219,12 @@ exports.getMatchedEvents = (req, res, next) => {
       JOIN event_interests ei ON ei.event_id    = e.id
       JOIN user_interests  ui ON ui.interest_id = ei.interest_id
       WHERE ui.user_id = ?
-        AND e.status = 'approved'
+        AND e.status = 'pending'
       ORDER BY e.date ASC
     `;
   
     db.all(sql, [userId], (err, events) => {
+      
       if (err) {
         console.error("Database error:", err);
         return res.status(500).json({ error: "Failed to fetch events." });
@@ -221,6 +238,9 @@ exports.getMatchedEvents = (req, res, next) => {
     });
   };
   
+
+
+
 
 exports.deleteEvent = (req, res, next) => {
     const eventId = parseInt(req.params.id, 10);
