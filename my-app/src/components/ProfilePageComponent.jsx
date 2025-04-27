@@ -1,5 +1,6 @@
 //ProfilePageComponent.jsx
 import React, { useState, useEffect } from 'react';
+//import useAuthUser from 'react-auth-kit/hooks/useAuthUser'; // Ensure authentication integration
 
 const styles = {
   container: {
@@ -76,16 +77,6 @@ const styles = {
   }
 };
 
-// Example fixed list of interests (could later fetch dynamically from backend)
-// const availableInterests = [
-//   'Programming',
-//   'Music',
-//   'Sports',
-//   'Art',
-//   'Networking',
-//   'Gaming',
-//   'Volunteering'
-// ];
 
 function ProfilePageComponent({ authUserId }) {
   const [name, setName] = useState('');
@@ -108,6 +99,11 @@ function ProfilePageComponent({ authUserId }) {
 
         const interestsData = await interestsResponse.json();
         const userData = await userResponse.json();
+
+        // Prefill user information
+        setName(userData.name || '');
+        setJNumber(userData.student_id || '');
+        setMajor(userData.major || '');
 
         setInterests(
           interestsData.map(interest => ({

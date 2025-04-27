@@ -63,9 +63,8 @@ const CalendarComponent = () => {
 
       {loading && <p>Loading events...</p>}
       {error && <p style={{ color: 'red' }}>Error loading events: {error}</p>}
-      {events.length === 0 && !loading && !error && <p>No events found. Try adding one!</p>}
-  
-      {events.length > 0 && (
+      {!loading && events.length === 0 && <p style={{ color: 'gray' }}>No events found yet. Set your interests in your profile to see relevant events!</p>}
+
         <Calendar
           localizer={localizer}
           events={events}
@@ -73,7 +72,6 @@ const CalendarComponent = () => {
           endAccessor="end"
           style={{ height: '80vh' }}
         />
-      )}
     </div>
   );
 };
