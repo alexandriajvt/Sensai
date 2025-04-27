@@ -2,6 +2,7 @@
 const db = require('../models/db');
 
 exports.createEvent = (req, res, next) => {
+  console.log("Decoded user in request:", req.user);//debugging
   const organizerId = req.user.id;  // set by authenticateToken
   const {
     title,
@@ -54,6 +55,9 @@ exports.createEvent = (req, res, next) => {
     }
   });
 };
+
+
+
 
 exports.updateEvent = (req, res, next) => {
     const eventId = parseInt(req.params.id, 10);
@@ -146,7 +150,10 @@ exports.updateEvent = (req, res, next) => {
     );
 };
 
+
 exports.getEventDetails = (req, res, next) => {
+  console.log("EventDetails route triggered with eventId:", req.params.id);
+
   const eventId = parseInt(req.params.id, 10);
   if (isNaN(eventId)) {
     return res.status(400).json({ error: 'Invalid event ID.' });
@@ -186,9 +193,19 @@ exports.getEventDetails = (req, res, next) => {
   });
 };
 
+
+
+
 exports.getMatchedEvents = (req, res, next) => {
-    const userId = req.user.id;  // set by authenticateToken
-  
+  console.log("MatchedEvents route triggered"); 
+
+    
+  const userId = req.user.id;  // set by authenticateToken
+  if (!userId) {
+    console.error("Error: User ID is undefined.");
+    return res.status(400).json({ error: "Invalid or missing user ID." });
+  }
+
     const sql = `
       SELECT DISTINCT
         e.id,
@@ -207,11 +224,23 @@ exports.getMatchedEvents = (req, res, next) => {
     `;
   
     db.all(sql, [userId], (err, events) => {
-      if (err) return next(err);
+      
+      if (err) {
+        console.error("Database error:", err);
+        return res.status(500).json({ error: "Failed to fetch events." });
+      }
+  
+      if (!events || events.length === 0) {
+        return res.json({ events: [] }); //  Prevents frontend errors when no events exist
+      }
+  
       res.json({ events });
     });
   };
   
+
+
+
 
 exports.deleteEvent = (req, res, next) => {
     const eventId = parseInt(req.params.id, 10);
@@ -237,7 +266,6 @@ exports.deleteEvent = (req, res, next) => {
           function(deleteErr) {
             if (deleteErr) return next(deleteErr);
             if (this.changes === 0) {
-              // Shouldn't happen since we checked existence, but just in case
               return res.status(404).json({ error: 'Event not found.' });
             }
             res.json({ message: 'Event deleted successfully.' });
@@ -246,6 +274,22 @@ exports.deleteEvent = (req, res, next) => {
       }
     );
 };
+
+exports.getPendingEvents = (req, res, next) => {
+  db.all(`SELECT * FROM events WHERE status = 'pending' ORDER BY created_at DESC`, (err, events) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Failed to fetch pending events." });
+    }
+
+    if (!events || events.length === 0) {
+      return res.json({ events: [] }); // Prevents frontend errors
+    }
+
+    res.json({ events });
+  });
+};
+
 
 
 exports.approveEvent = (req, res, next) => {

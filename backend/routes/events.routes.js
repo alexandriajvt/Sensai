@@ -13,43 +13,50 @@ router.post(
   eventsController.createEvent,
 );
 
-router.put(
-    '/:id',
-    authenticateToken,
-    authorize(['organizer','admin']),
-    eventsController.updateEvent
+router.get(
+  '/matchedEvents',
+  authenticateToken,
+  eventsController.getMatchedEvents
 );
 
 router.get(
-    '/:id',
-    authenticateToken,
-    eventsController.getEventDetails
-  );
-  
+  '/pending', 
+  authenticateToken, 
+  eventsController.getPendingEvents
+);
+
 router.get(
-    '/matched',
-    authenticateToken,
-    eventsController.getMatchedEvents
+  '/:id',
+  authenticateToken,
+  eventsController.getEventDetails
+);
+
+router.put(
+  '/:id',
+  authenticateToken,
+  authorize(['organizer','admin']),
+  eventsController.updateEvent
 );
 
 router.delete(
-    '/:id',
-    authenticateToken,
-    authorize(['organizer','admin']),
-    eventsController.deleteEvent
+  '/:id',
+  authenticateToken,
+  authorize(['organizer','admin']),
+  eventsController.deleteEvent
 );
-  
+
 router.put(
     '/:id/approve',
     authenticateToken,
     authorize(['admin']),
     eventsController.approveEvent
   );
-  router.put(
-    '/:id/reject',
-    authenticateToken,
-    authorize(['admin']),
-    eventsController.rejectEvent
-  );
+
+router.put(
+  '/:id/reject',
+  authenticateToken,
+  authorize(['admin']),
+  eventsController.rejectEvent
+);
 
 module.exports = router;
