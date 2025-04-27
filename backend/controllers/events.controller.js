@@ -219,7 +219,7 @@ exports.getMatchedEvents = (req, res, next) => {
       JOIN event_interests ei ON ei.event_id    = e.id
       JOIN user_interests  ui ON ui.interest_id = ei.interest_id
       WHERE ui.user_id = ?
-        AND e.status = 'pending'
+        AND e.status = 'approved'
       ORDER BY e.date ASC
     `;
   
@@ -266,7 +266,6 @@ exports.deleteEvent = (req, res, next) => {
           function(deleteErr) {
             if (deleteErr) return next(deleteErr);
             if (this.changes === 0) {
-              // Shouldn't happen since we checked existence, but just in case
               return res.status(404).json({ error: 'Event not found.' });
             }
             res.json({ message: 'Event deleted successfully.' });
@@ -275,6 +274,22 @@ exports.deleteEvent = (req, res, next) => {
       }
     );
 };
+
+exports.getPendingEvents = (req, res, next) => {
+  db.all(`SELECT * FROM events WHERE status = 'pending' ORDER BY created_at DESC`, (err, events) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: "Failed to fetch pending events." });
+    }
+
+    if (!events || events.length === 0) {
+      return res.json({ events: [] }); // Prevents frontend errors
+    }
+
+    res.json({ events });
+  });
+};
+
 
 
 exports.approveEvent = (req, res, next) => {
