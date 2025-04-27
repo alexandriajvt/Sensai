@@ -9,6 +9,7 @@ import SignInPage from "./pages/SignInPage";
 import LogOutPage from "./pages/LogOutPage";
 import EventPage from './pages/EventPage';
 import MainNavBar from './components/Navbar';
+import EventApprovalPage from './components/EventApprovalComponent';
 import {Routes, Route,} from "react-router-dom";
 //import RequireAuth from '@auth-kit/react-router/RequireAuth';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -32,6 +33,7 @@ function App() {
             <Route path="/calendar" element={<CalendarPage/>} />
             <Route path="/logout" element={<LogOutPage/>} />
             <Route path="/events" element={<EventPage/>} />
+            <Route path="/event-approval" element={<EventApprovalPage/>} />
           </Route>
         </Routes>
     </div>  
