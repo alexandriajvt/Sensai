@@ -103,6 +103,17 @@ const createEventInterestsTable = `
   );
 `;
 
+const createContacFormTable = `
+  CREATE TABLE IF NOT EXISTS inquiries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    message TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+`
+
 // Seed data for categories and interests
 const categories = ['Social','Career','Cultural','Sports','Academic'];
 const interestMapping = {
@@ -137,6 +148,7 @@ db.serialize(() => {
   db.run(createInterestsTable);
   db.run(createUserInterestsTable);
   db.run(createEventInterestsTable);
+  db.run(createContacFormTable);
 
   // Seed categories
   const catStmt = db.prepare(`INSERT OR IGNORE INTO categories (name) VALUES (?);`);
