@@ -7,7 +7,6 @@ import Nav from 'react-bootstrap/Nav'
 import NavDropdown from 'react-bootstrap/NavDropdown'
 import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
 import logo from '/Users/kumuluvv/sensai-react-frame/my-app/src/Sensei Logo.png' // Replace with your logo's path
-//import './Navbar.css';
 
 
 function MainNavBar() {
