@@ -124,6 +124,10 @@ const interestMapping = {
   Academic: ['Research Opportunities','Tutoring Services','Honors Programs','Academic Workshops', 'Study Groups']
 };
 
+const addNotificationColumn = `
+  ALTER TABLE users ADD COLUMN notifications_enabled INTEGER DEFAULT 0;
+`;
+
 // Apply schema and seed
 db.serialize(() => {
   // Core tables

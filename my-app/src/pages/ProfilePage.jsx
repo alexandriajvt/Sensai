@@ -1,371 +1,58 @@
 //Allows students to set up interests, dorms, and notifications
-import React, { useState, useEffect } from 'react';
-import './ProfilePage.css';
+import useAuthUser from 'react-auth-kit/hooks/useAuthUser'; // Ensure authentication integration
 
-// Available interests categories
-const INTERESTS_CATEGORIES = {
-  academic: [
-    { id: 'research', label: 'Research Opportunities' },
-    { id: 'workshops', label: 'Academic Workshops' },
-    { id: 'tutoring', label: 'Tutoring Services' },
-    { id: 'study_groups', label: 'Study Groups' },
-    { id: 'honors', label: 'Honors Programs' }
-  ],
-  sports: [
-    { id: 'football', label: 'Football Games' },
-    { id: 'basketball', label: 'Basketball Games' },
-    { id: 'baseball', label: 'Baseball Games' },
-    { id: 'track', label: 'Track & Field' },
-    { id: 'intramural', label: 'Intramural Sports' }
-  ],
-  cultural: [
-    { id: 'art_exhibits', label: 'Art Exhibits' },
-    { id: 'music_events', label: 'Music Events' },
-    { id: 'dance', label: 'Dance Performances' },
-    { id: 'theater', label: 'Theater Productions' },
-    { id: 'cultural_festivals', label: 'Cultural Festivals' }
-  ],
-  career: [
-    { id: 'job_fairs', label: 'Job Fairs' },
-    { id: 'internships', label: 'Internship Opportunities' },
-    { id: 'resume_workshops', label: 'Resume Workshops' },
-    { id: 'networking', label: 'Networking Events' },
-    { id: 'career_counseling', label: 'Career Counseling' }
-  ],
-  social: [
-    { id: 'student_orgs', label: 'Student Organization Events' },
-    { id: 'greek_life', label: 'Greek Life Events' },
-    { id: 'campus_parties', label: 'Campus Parties' },
-    { id: 'movie_nights', label: 'Movie Nights' },
-    { id: 'game_nights', label: 'Game Nights' }
-  ]
-};
+import React, { useEffect, useState } from 'react';import './ProfilePage.css';
+import ProfilePageComponent from '../components/ProfilePageComponent';
+import ErrorBoundary from '../ErrorBoundary';
+import useAuthHeader from 'react-auth-kit/hooks/useAuthHeader';
+const ProfilePage = () => {
+  const authHeader = useAuthHeader();
+  //console.log('Authorization header:', authHeader);
+  const currentUser = useAuthUser(); // Extract basic user informationz; name,email,role,id
+  const [userData, setUserData] = useState(null); // Store full user profile
+  const [loading, setLoading] = useState(true);
+  //const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6Im9yZ2FuaXplciIsImlhdCI6MTc0NTg2MDEwNiwiZXhwIjoxNzQ1ODYzNzA2fQ.ZjrlSBJ2ckRHJc73edzL8ag0T6PFmHXKzOvl0WmmgWo';
 
-function ProfilePage() {
-  const [formData, setFormData] = useState({
-    name: '',
-    schoolId: '',
-    email: '',
-    major: '',
-    classification: '',
-    expectedGraduation: '',
-    dorm: '',
-    organizations: [],
-    interests: [],
-    notificationPreferences: {
-      email: true,
-      push: true,
-      sms: false
-    }
-  });
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedInterests, setSelectedInterests] = useState({});
-
-  // Load saved interests from localStorage on component mount
   useEffect(() => {
-    const savedInterests = localStorage.getItem('userInterests');
-    if (savedInterests) {
-      setSelectedInterests(JSON.parse(savedInterests));
-    }
-  }, []);
-
-  // Save interests to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('userInterests', JSON.stringify(selectedInterests));
-  }, [selectedInterests]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prevState => ({
-        ...prevState,
-        [name]: ''
-      }));
-    }
-  };
-
-  const handleNotificationChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      notificationPreferences: {
-        ...prevState.notificationPreferences,
-        [name]: checked
+    const fetchUserProfile = async () => {
+      if (currentUser && currentUser.id) {
+        try {
+          const response = await fetch(`http://localhost:5001/api/users/${currentUser.id}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: authHeader,// Use the token from authHeader
+            },
+          });
+          if (!response.ok) {
+            throw new Error('Failed to fetch user data.');
+          }
+          const data = await response.json();
+          setUserData(data);
+        } catch (error) {
+          console.error('Error fetching user profile:', error.message);
+        } finally {
+          setLoading(false);
+        }
       }
-    }));
-  };
+    };
+  
+    fetchUserProfile();
+  }, [currentUser, authHeader]); // Include authHeader in the dependency array
+  ;
 
-  const handleInterestChange = (category, interestId) => {
-    setSelectedInterests(prev => ({
-      ...prev,
-      [interestId]: !prev[interestId]
-    }));
-  };
-
-  const handleCategorySelect = (category) => {
-    const categoryInterests = INTERESTS_CATEGORIES[category];
-    const allSelected = categoryInterests.every(interest => selectedInterests[interest.id]);
-    
-    const newSelectedInterests = { ...selectedInterests };
-    categoryInterests.forEach(interest => {
-      newSelectedInterests[interest.id] = !allSelected;
-    });
-    
-    setSelectedInterests(newSelectedInterests);
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-    if (!formData.schoolId.trim()) {
-      newErrors.schoolId = 'School ID is required';
-    } else if (!/^[Jj]\d{8}$/.test(formData.schoolId)) {
-      newErrors.schoolId = 'Invalid JSU ID format (e.g., J12345678)';
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
-    }
-    if (!formData.major.trim()) {
-      newErrors.major = 'Major is required';
-    }
-    if (!formData.classification) {
-      newErrors.classification = 'Classification is required';
-    }
-    if (!formData.expectedGraduation) {
-      newErrors.expectedGraduation = 'Expected graduation date is required';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setIsSubmitting(true);
-      try {
-        // Convert selectedInterests to an array of selected interest IDs
-        const selectedInterestIds = Object.entries(selectedInterests)
-          .filter(([_, isSelected]) => isSelected)
-          .map(([id]) => id);
-
-        const formDataWithInterests = {
-          ...formData,
-          interests: selectedInterestIds
-        };
-
-        // Save to localStorage as temporary storage
-        localStorage.setItem('userProfile', JSON.stringify(formDataWithInterests));
-        
-        console.log('Form submitted:', formDataWithInterests);
-        alert('Profile updated successfully!');
-      } catch (error) {
-        console.error('Error submitting form:', error);
-        alert('Failed to update profile. Please try again.');
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
-  };
+  if (loading) {
+    return <p>Loading profile...</p>;
+  }
 
   return (
-    <div className="profile-container">
-      <h2>JSU Student Profile</h2>
-      <form onSubmit={handleSubmit} className="profile-form">
-        <section className="form-section">
-          <h3>Personal Information</h3>
-          <div className="form-group">
-            <label>Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className={errors.name ? 'error' : ''}
-              required
-            />
-            {errors.name && <span className="error-message">{errors.name}</span>}
-          </div>
-
-          <div className="form-group">
-            <label>JSU ID</label>
-            <input
-              type="text"
-              name="schoolId"
-              value={formData.schoolId}
-              onChange={handleChange}
-              placeholder="J12345678"
-              className={errors.schoolId ? 'error' : ''}
-              required
-            />
-            {errors.schoolId && <span className="error-message">{errors.schoolId}</span>}
-          </div>
-
-          <div className="form-group">
-            <label>JSU Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="username@jsums.edu"
-              className={errors.email ? 'error' : ''}
-              required
-            />
-            {errors.email && <span className="error-message">{errors.email}</span>}
-          </div>
-        </section>
-
-        <section className="form-section">
-          <h3>Academic Information</h3>
-          <div className="form-group">
-            <label>Major</label>
-            <input
-              type="text"
-              name="major"
-              value={formData.major}
-              onChange={handleChange}
-              className={errors.major ? 'error' : ''}
-              required
-            />
-            {errors.major && <span className="error-message">{errors.major}</span>}
-          </div>
-
-          <div className="form-group">
-            <label>Classification</label>
-            <select
-              name="classification"
-              value={formData.classification}
-              onChange={handleChange}
-              className={errors.classification ? 'error' : ''}
-              required
-            >
-              <option value="">Select Classification</option>
-              <option value="freshman">Freshman</option>
-              <option value="sophomore">Sophomore</option>
-              <option value="junior">Junior</option>
-              <option value="senior">Senior</option>
-              <option value="graduate">Graduate</option>
-            </select>
-            {errors.classification && <span className="error-message">{errors.classification}</span>}
-          </div>
-
-          <div className="form-group">
-            <label>Expected Graduation</label>
-            <input
-              type="month"
-              name="expectedGraduation"
-              value={formData.expectedGraduation}
-              onChange={handleChange}
-              className={errors.expectedGraduation ? 'error' : ''}
-              required
-            />
-            {errors.expectedGraduation && <span className="error-message">{errors.expectedGraduation}</span>}
-          </div>
-        </section>
-
-        <section className="form-section">
-          <h3>Housing Information</h3>
-          <div className="form-group">
-            <label>Residence Hall</label>
-            <select
-              name="dorm"
-              value={formData.dorm}
-              onChange={handleChange}
-            >
-              <option value="">Select Residence Hall</option>
-              <option value="campbell">Campbell Hall</option>
-              <option value="dixon">Dixon Hall</option>
-              <option value="hudson">Hudson Hall</option>
-              <option value="off-campus">Off Campus</option>
-            </select>
-          </div>
-        </section>
-
-        <section className="form-section">
-          <h3>Interests & Events</h3>
-          <div className="interests-container">
-            {Object.entries(INTERESTS_CATEGORIES).map(([category, interests]) => (
-              <div key={category} className="interest-category">
-                <div className="category-header">
-                  <h4>{category.charAt(0).toUpperCase() + category.slice(1)} Events</h4>
-                  <button
-                    type="button"
-                    className="select-all-button"
-                    onClick={() => handleCategorySelect(category)}
-                  >
-                    Select All
-                  </button>
-                </div>
-                <div className="interests-grid">
-                  {interests.map(interest => (
-                    <label key={interest.id} className="interest-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={selectedInterests[interest.id] || false}
-                        onChange={() => handleInterestChange(category, interest.id)}
-                      />
-                      <span>{interest.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="form-section">
-          <h3>Notification Preferences</h3>
-          <div className="notification-preferences">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                name="email"
-                checked={formData.notificationPreferences.email}
-                onChange={handleNotificationChange}
-              />
-              Email Notifications
-            </label>
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                name="push"
-                checked={formData.notificationPreferences.push}
-                onChange={handleNotificationChange}
-              />
-              Push Notifications
-            </label>
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                name="sms"
-                checked={formData.notificationPreferences.sms}
-                onChange={handleNotificationChange}
-              />
-              SMS Notifications
-            </label>
-          </div>
-        </section>
-
-        <button 
-          type="submit" 
-          className="submit-button"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Saving...' : 'Save Profile'}
-        </button>
-      </form>
+    <div>
+      <ErrorBoundary>
+        {/* Pass authenticated user ID as a prop */}
+        <ProfilePageComponent userId={currentUser.id} userData={userData} />
+      </ErrorBoundary>
     </div>
   );
-}
+};
 
 export default ProfilePage;
