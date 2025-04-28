@@ -46,6 +46,9 @@ app.use('/api/rsvp', rsvpRoutes);
 const contactRoutes = require('./routes/contact.routes');
 app.use('/api/contact', contactRoutes); // mounts the contact routes at /api/contact
 
+const notificationRoutes = require('./routes/notification.routes');
+app.use('/api/notifications', notificationRoutes);
+
 
 // Error-handling middleware
 app.use((err, req, res, next) => {

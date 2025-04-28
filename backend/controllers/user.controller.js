@@ -13,7 +13,7 @@ exports.getUserInfo = (req, res, next) => {
 
   // 1) Fetch core user profile
   const sqlUser = `
-    SELECT id, name, email, student_id, major, classification, role, created_at, residence
+    SELECT id, name, email, student_id, major, classification, role, created_at, residence, notifications_enabled
       FROM users
      WHERE id = ?
   `;
@@ -57,6 +57,7 @@ exports.updateUser = (req, res, next) => {
     classification,
     role,
     residence,
+    notifications_enabled,
     interestIds // array of selected interest IDs from checkboxes
   } = req.body;
 
@@ -69,6 +70,7 @@ exports.updateUser = (req, res, next) => {
            classification = COALESCE(?, classification),
            role           = COALESCE(?, role),
            residence      = COALESCE(?, residence)
+           notifications_enabled = COALESCE(?, notifications_enabled)
      WHERE id = ?
   `;
   const params = [
@@ -115,7 +117,7 @@ exports.updateUser = (req, res, next) => {
     function fetchUpdatedUser() {
       const sqlFetch = `
         SELECT u.id, u.name, u.email, u.student_id, u.major,
-               u.classification, u.role, u.residence, u.created_at,
+               u.classification, u.role, u.residence, u.created_at,u.notifications_enabled,
                i.id   AS interest_id,
                i.name AS interest_name
           FROM users u
