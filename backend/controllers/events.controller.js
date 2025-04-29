@@ -1,5 +1,6 @@
 // controllers/events.controller.js
 const db = require('../models/db');
+const { notifyUsersAboutEvent } = require('../utils/notificationUtils');
 
 exports.createEvent = (req, res, next) => {
   console.log("Decoded user in request:", req.user);//debugging

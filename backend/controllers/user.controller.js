@@ -1,47 +1,28 @@
 //user.controller.js
-
 const db = require('../models/db');
+
 
 exports.getUserInfo = (req, res, next) => {
   const requestedUserId = parseInt(req.params.id, 10);
-  const loggedInUser    = req.user;
 
-  // Authorization
-  if (loggedInUser.id !== requestedUserId && loggedInUser.role !== 'admin') {
-    return res.status(403).json({ error: 'Access denied.' });
-  }
+  db.get('SELECT * FROM users WHERE id = ?', [requestedUserId], (err, user) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Failed to retrieve user info.' });
+    }
 
-  // 1) Fetch core user profile
-  const sqlUser = `
-    SELECT id, name, email, student_id, major, classification, role, created_at, residence, notifications_enabled
-      FROM users
-     WHERE id = ?
-  `;
-  db.get(sqlUser, [requestedUserId], (err, userRow) => {
-    if (err) return next(err);
-    if (!userRow) return res.status(404).json({ error: 'User not found.' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
 
-    // 2) Fetch the user’s interests
-    const sqlInts = `
-      SELECT i.id, i.name
-        FROM interests i
-        JOIN user_interests ui ON ui.interest_id = i.id
-       WHERE ui.user_id = ?
-       ORDER BY i.name
-    `;
-    db.all(sqlInts, [requestedUserId], (intErr, interests) => {
-      if (intErr) return next(intErr);
-
-      // 3) Respond with profile + interests
-      res.json({
-        ...userRow,
-        interests   // array of { id, name }
-      });
-    });
+    res.status(200).json(user);
   });
 };
 
+
 exports.updateUser = (req, res, next) => {
+  console.log("Received PUT request for user ID:", req.params.id);
+  console.log("Request body:", req.body);
   const requestedUserId = parseInt(req.params.id, 10);
   const loggedInUser = req.user;
 
@@ -69,12 +50,12 @@ exports.updateUser = (req, res, next) => {
            major          = COALESCE(?, major),
            classification = COALESCE(?, classification),
            role           = COALESCE(?, role),
-           residence      = COALESCE(?, residence)
+           residence      = COALESCE(?, residence),
            notifications_enabled = COALESCE(?, notifications_enabled)
      WHERE id = ?
   `;
   const params = [
-    name, email, student_id, major, classification, role, residence,
+    name, email, student_id, major, classification, role, residence, notifications_enabled ? 1 : 0,
     requestedUserId
   ];
 
@@ -147,14 +128,28 @@ exports.updateUser = (req, res, next) => {
 };
 
 
+exports.getUserInterests = (req, res, next) => {
+  const requestedUserId = parseInt(req.params.id, 10);
+
+  const sqlQuery = `SELECT interest_id FROM user_interests WHERE user_id = ?`;
+  
+  db.all(sqlQuery, [requestedUserId], (err, rows) => {
+      if (err) return next(err);
+      const interestIds = rows.map(row => row.interest_id);
+      
+      res.json({ interestIds });
+  });
+};
+
+
 exports.updateUserInterests = (req, res, next) => {
   const requestedUserId = parseInt(req.params.id, 10);
   const loggedInUser = req.user;
-
+  //console.log("Received interests for update:", interestIds); // ✅ 
   // Authorization: Ensure user is allowed to update their own interests or is an admin
-  if (loggedInUser.id !== requestedUserId && loggedInUser.role !== 'admin') {
-    return res.status(403).json({ error: 'Access denied.' });
-  }
+  //if (loggedInUser.id !== requestedUserId && loggedInUser.role !== 'admin') {
+  //  return res.status(403).json({ error: 'Access denied.' });
+ // }
 
   const { interestIds } = req.body; // Extract selected interest IDs from request body
 
@@ -178,5 +173,25 @@ exports.updateUserInterests = (req, res, next) => {
     } else {
       res.json({ message: 'User interests cleared successfully.' });
     }
+  });
+};
+
+
+
+
+exports.getNotificationPreference = async (req, res) => {
+  const { userId } = req.params;
+
+  db.get('SELECT notifications_enabled FROM users WHERE id = ?', [userId], (err, row) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Failed to fetch preference' });
+    }
+
+    if (!row) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.status(200).json({ notificationsEnabled: row.notifications_enabled });
   });
 };
