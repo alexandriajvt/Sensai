@@ -17,87 +17,86 @@ const getUserEmail = (userId) => {
     });
   };
 
-  exports.sendEventNotification = async (req, res) => {
+exports.sendEventNotification = async (req, res) => {
+  console.log("Request headers:", req.headers);
+  console.log("User object:", req.user);
+  const userId = req.user.id; // ✅ Get logged-in user's ID
     try {
-      const eventsQuery = `SELECT id, title, date FROM events`;
-      db.all(eventsQuery, [], async (err, events) => {
-        if (err) {
-          console.error('Error fetching events:', err);
-          return res.status(500).json({ error: 'Database error while fetching events' });
-        }
-  
-        for (const event of events) {
-          try {
-            await notifyUsersAboutEvent(event.id, event.title, event.date);
-          } catch (notifyErr) {
-            console.error(`Error notifying users about event ${event.title}:`, notifyErr);
-            // You may decide to continue or break here based on how critical a single failure is
-          }
-        }
-  
-        res.status(200).json({ message: 'Notifications sent for all events' });
-      });
+
+        // Get unique events that match the logged-in user's interests
+        const eventsQuery = `
+            SELECT DISTINCT e.id, e.title, e.date 
+            FROM events e
+            JOIN event_interests ei ON e.id = ei.event_id
+            JOIN user_interests ui ON ei.interest_id = ui.interest_id
+            WHERE ui.user_id = ?;  --  Ensures only events related to this user
+        `;
+
+        db.all(eventsQuery, [userId], async (err, events) => {
+            if (err) {
+                console.error('Error fetching events:', err);
+                return res.status(500).json({ error: 'Database error while fetching events' });
+            }
+
+            if (events.length === 0) {
+                console.log(`No matching events found for user ${userId}.`);
+                return res.status(200).json({ message: 'No event notifications for this user.' });
+            }
+
+            // ✅ Send notifications only once per event
+            for (const event of events) {
+                try {
+                    await notifyUsersAboutEvent(event.id, event.title, event.date, [userId]); // 🔹 Notify only logged-in user
+                } catch (notifyErr) {
+                    console.error(`Error notifying user about event ${event.title}:`, notifyErr);
+                }
+            }
+
+            res.status(200).json({ message: 'Notifications sent for matching events only.' });
+        });
+
     } catch (error) {
-      console.error('Failed to send event notifications:', error);
-      res.status(500).json({ error: 'Failed to send notifications' });
+        console.error('Failed to send event notifications:', error);
+        res.status(500).json({ error: 'Failed to send notifications' });
     }
-  };
+};
 
   
 
 //Sends a confirmation email when a user enables notifications.
 exports.handleNotificationToggle = async (req, res) => {
-  const { userId, enableNotifications } = req.body;
-
-  if (!userId) {
-    return res.status(400).json({ error: 'User ID is required' });
-  }
-
-  try {
-    const userEmail = await getUserEmail(userId);
-
-    if (enableNotifications) {
-      // 1. Send confirmation email
-      const message = `You have successfully enabled notifications. You'll now receive updates for all events!`;
-      await sendEmail(userEmail, 'Event Notifications were enabled!', message);
+    const { userId, enableNotifications } = req.body;
+  
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
     }
-
-    // 2. Update notification preference
-    const updateQuery = `UPDATE users SET notifications_enabled = ? WHERE id = ?`;
-    await new Promise((resolve, reject) => {
-      db.run(updateQuery, [enableNotifications ? 1 : 0, userId], (err) => {
-        if (err) return reject(err);
-        resolve();
-      });
-    });
-
-    // 3. If enabling notifications, immediately send alerts for existing events
-    if (enableNotifications) {
-      const eventsQuery = `SELECT id, title, date FROM events`;
-      db.all(eventsQuery, [], async (err, events) => {
-        if (err) {
-          console.error('Error fetching events:', err);
-          return res.status(500).json({ error: 'Database error while fetching events' });
-        }
-
-        for (const event of events) {
-          try {
-            await notifyUsersAboutEvent(event.id, event.title, event.date, [userId]); // limit to just this user
-          } catch (notifyErr) {
-            console.error(`Error notifying user about event ${event.title}:`, notifyErr);
+  
+    try {
+      // Fetch email from the database
+      const userEmail = await getUserEmail(userId);
+  
+      if (enableNotifications) {
+        // Sends a notification email (immediate trigger)
+        const message = `You have successfully enabled notifications. You'll now receive updates for all events!`;
+        await sendEmail(userEmail, 'Event Notifications were enabled!', message);
+      }
+  
+      // Update the notification preference in the database
+      const query = `UPDATE users SET notifications_enabled = ? WHERE id = ?`;
+      await new Promise((resolve, reject) => {
+        db.run(query, [enableNotifications ? 1 : 0, userId], (err) => {
+          if (err) {
+            return reject(err);
           }
-        }
-
-        return res.status(200).json({ message: 'Notification preference updated and alerts sent' });
+          resolve();
+        });
       });
-    } else {
+  
       res.status(200).json({ message: 'Notification preference updated successfully' });
+    } catch (error) {
+      console.error('Error handling notification toggle:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-  } catch (error) {
-    console.error('Error handling notification toggle:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
+  };
   
 
