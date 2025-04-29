@@ -1,48 +1,64 @@
 //ProfilePageComponent.jsx
 import React, { useState, useEffect } from 'react';
-//import useAuthUser from 'react-auth-kit/hooks/useAuthUser'; // Ensure authentication integration
 import NotificationToggle from './NotificationToggle';
+import { useNavigate } from 'react-router-dom';
 
-// Available interests categories
-const INTERESTS_CATEGORIES = {
-  academic: [
-    { id: 'research', label: 'Research Opportunities' },
-    { id: 'workshops', label: 'Academic Workshops' },
-    { id: 'tutoring', label: 'Tutoring Services' },
-    { id: 'study_groups', label: 'Study Groups' },
-    { id: 'honors', label: 'Honors Programs' }
-  ],
-  sports: [
-    { id: 'football', label: 'Football Games' },
-    { id: 'basketball', label: 'Basketball Games' },
-    { id: 'baseball', label: 'Baseball Games' },
-    { id: 'track', label: 'Track & Field' },
-    { id: 'intramural', label: 'Intramural Sports' }
-  ],
-  cultural: [
-    { id: 'art_exhibits', label: 'Art Exhibits' },
-    { id: 'music_events', label: 'Music Events' },
-    { id: 'dance', label: 'Dance Performances' },
-    { id: 'theater', label: 'Theater Productions' },
-    { id: 'cultural_festivals', label: 'Cultural Festivals' }
-  ],
-  career: [
-    { id: 'job_fairs', label: 'Job Fairs' },
-    { id: 'internships', label: 'Internship Opportunities' },
-    { id: 'resume_workshops', label: 'Resume Workshops' },
-    { id: 'networking', label: 'Networking Events' },
-    { id: 'career_counseling', label: 'Career Counseling' }
-  ],
-  social: [
-    { id: 'student_orgs', label: 'Student Organization Events' },
-    { id: 'greek_life', label: 'Greek Life Events' },
-    { id: 'campus_parties', label: 'Campus Parties' },
-    { id: 'movie_nights', label: 'Movie Nights' },
-    { id: 'game_nights', label: 'Game Nights' }
-  ]
-};
 
 function ProfilePageComponent({userData, userId}) {
+  const [availableInterests, setAvailableInterests] = useState([]);
+  const navigate = useNavigate();//used for rerouting after savign profile
+  useEffect(() => {
+    const fetchInterests = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/api/categories/interests');
+        if (!response.ok) throw new Error('Failed to fetch interests');
+        const data = await response.json();
+        setAvailableInterests(data); // ✅ Store all interests from API
+      } catch (error) {
+        console.error('Error fetching interests:', error);
+      }
+    };
+
+    fetchInterests();
+  }, []);
+
+  //fetch the user's saved interests from user_interests
+  useEffect(() => {
+    const fetchUserInterests = async () => {
+        const token = localStorage.getItem('authToken');
+
+        try {
+            const response = await fetch(`http://localhost:5001/api/users/${userId}/interests`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch user interests');
+
+            const data = await response.json();
+            console.log('Fetched user interests:', data.interestIds); // ✅ Debugging log
+
+            // ✅ Prepopulate checkboxes
+            const interestsMap = data.interestIds.reduce((acc, interestId) => {
+                acc[interestId] = true;
+                return acc;
+            }, {});
+
+            setSelectedInterests(interestsMap);
+        } catch (error) {
+            console.error('Error fetching user interests:', error);
+        }
+    };
+
+    if (userId) {
+        fetchUserInterests();
+    }
+}, [userId]);
+
+
   // Update formData whenever userData changes
   useEffect(() => {
     if (userData) {
@@ -55,19 +71,21 @@ function ProfilePageComponent({userData, userId}) {
         dorm: userData.residence || '',
         interests: userData.interests || [],
         notificationPreferences: {
-          email: userData.notifications_enabled === 1, // Convert DB integer to boolean
-        },
+          email: !!userData.notifications_enabled, // ✅ Ensure boolean conversion
+      },
       });
-
+      console.log('Mapped interests:', userData.interests);
+      
       const interestsMap = (userData.interests || []).reduce((acc, interestId) => {
         acc[interestId] = true;
         return acc;
       }, {});
+    
       setSelectedInterests(interestsMap);
     }
   }, [userData]);
 
-  console.log('Received userData:', userData); // Debug userId prop
+
   const [formData, setFormData] = useState({
     name: '',
     schoolId: '',
@@ -78,23 +96,13 @@ function ProfilePageComponent({userData, userId}) {
     organizations: [],
     interests: [],
     notificationPreferences: {
-      email: userData?.notifications_enabled === 1,
-    },
+      email:userData?.notifications_enabled === 1,},
   });
 
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedInterests, setSelectedInterests] = useState(() => {
-    
-  
-    const interestsMap = formData.interests.reduce((acc, interestId) => {
-      acc[interestId] = true;
-      return acc;
-    }, {});
-    return interestsMap;
-  });
-  
+  const [selectedInterests, setSelectedInterests] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -122,26 +130,16 @@ function ProfilePageComponent({userData, userId}) {
   //   }));
   // };
 
-  const handleInterestChange = (category, interestId) => {
-    setSelectedInterests(prev => ({
-      ...prev,
-      [interestId]: !prev[interestId]
-    }));
+  const handleInterestChange = (interestId) => {
+    setSelectedInterests(prev => {
+      const updatedInterests = { ...prev, [interestId]: !prev[interestId] };
+      return updatedInterests;
+    });
   };
 
-  const handleCategorySelect = (category) => {
-    const categoryInterests = INTERESTS_CATEGORIES[category];
-    const allSelected = categoryInterests.every(interest => selectedInterests[interest.id]);
-    
-    const newSelectedInterests = { ...selectedInterests };
-    categoryInterests.forEach(interest => {
-      newSelectedInterests[interest.id] = !allSelected;
-    });
-    
-    setSelectedInterests(newSelectedInterests);
-  };
 
   const validateForm = () => {
+    console.log('Validating form...'); // ✅ Debugging log
     const newErrors = {};
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
@@ -162,47 +160,103 @@ function ProfilePageComponent({userData, userId}) {
     if (!formData.classification) {
       newErrors.classification = 'Classification is required';
     }
-    if (!formData.expectedGraduation) {
-      newErrors.expectedGraduation = 'Expected graduation date is required';
-    }
+    console.log('Validation errors:', newErrors); // ✅ Debugging log
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (validateForm()) {
-      setIsSubmitting(true);
-      try {
-        const selectedInterestIds = Object.entries(selectedInterests)
-          .filter(([_, isSelected]) => isSelected)
-          .map(([id]) => id);
+        setIsSubmitting(true);
+        const token = localStorage.getItem('authToken');
 
-        const formDataWithInterests = {
-          ...formData,
-          interests: selectedInterestIds,
-        };
+        try {
+            // Extract selected interest IDs
+            const selectedInterestIds = Object.entries(selectedInterests)
+                .filter(([_, isSelected]) => isSelected)
+                .map(([id]) => id);
+            
 
-        // Send updated profile to the backend
-        const response = await fetch(`http://localhost:5001/api/users/${userId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formDataWithInterests),
-        });
 
-        if (!response.ok) {
-          throw new Error('Failed to update profile');
+            // ✅ Send user profile update request
+            const userResponse = await fetch(`http://localhost:5001/api/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  ...formData,
+                  notifications_enabled: formData.notificationPreferences.email ? 1 : 0, // ✅ Ensure correct format
+              }),
+            });
+
+            if (!userResponse.ok) {
+                throw new Error('Failed to update user profile');
+            }
+
+
+
+            console.log('User profile updated successfully.');
+
+            // Sends interests update request separately since its a different table and interests are not stored in user table
+            const interestsResponse = await fetch(`http://localhost:5001/api/users/${userId}/setInterests`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ interestIds: selectedInterestIds }), // 🔹 Send only interests
+            });
+            if (!interestsResponse.ok) {
+                throw new Error('Failed to update interests');
+            }
+
+            console.log('Interests updated successfully.');
+            alert('Profile update request sent successfully! One moment for the update to complete.');
+            
+            const notificationToggleResponse = await fetch('http://localhost:5001/api/notifications/alert/preferences', {
+              method: 'POST',
+              headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ userId, enableNotifications: formData.notificationPreferences.email }),
+          });
+          
+          if (!notificationToggleResponse.ok) {
+              throw new Error('Failed to update notification preferences');
+          }
+          console.log('Notification preferences updated successfully.');
+          
+          // ✅ Call `sendEventNotification` to send event notifications
+          const eventNotificationResponse = await fetch('http://localhost:5001/api/notifications/alert', {
+              method: 'POST',
+              headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+              },
+          });
+          
+          if (!eventNotificationResponse.ok) {
+              throw new Error('Failed to send event notifications');
+          }
+          console.log('Event notifications sent successfully.');
+        
+          navigate('/calendar'); 
+
+
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('Failed to update profile. Please try again.');
+        } finally {
+            setIsSubmitting(false);
         }
-
-        alert('Profile updated successfully!');
-      } catch (error) {
-        console.error('Error submitting form:', error);
-        alert('Failed to update profile. Please try again.');
-      } finally {
-        setIsSubmitting(false);
-      }
     }
-  };
+};
 
   return (
     <div className="profile-container">
@@ -314,31 +368,16 @@ function ProfilePageComponent({userData, userId}) {
         <section className="form-section">
           <h3>Interests & Events</h3>
           <div className="interests-container">
-            {Object.entries(INTERESTS_CATEGORIES).map(([category, interests]) => (
-              <div key={category} className="interest-category">
-                <div className="category-header">
-                  <h4>{category.charAt(0).toUpperCase() + category.slice(1)} Events</h4>
-                  <button
-                    type="button"
-                    className="select-all-button"
-                    onClick={() => handleCategorySelect(category)}
-                  >
-                    Select All
-                  </button>
-                </div>
-                <div className="interests-grid">
-                  {interests.map(interest => (
-                    <label key={interest.id} className="interest-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={selectedInterests[interest.id] || false}
-                        onChange={() => handleInterestChange(category, interest.id)}
-                      />
-                      <span>{interest.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+            {availableInterests.map((interest) => (
+              <label key={interest.id} className="interest-checkbox">
+                <input
+                  type="checkbox"
+                  id={`interest-${interest.id}`}
+                  checked={selectedInterests[interest.id] || false}
+                  onChange={(e) => handleInterestChange(interest.id, e.target.checked)}
+                />
+                <span>{interest.name}</span> {/* Dynamically loads interest names */}
+              </label>
             ))}
           </div>
         </section>
@@ -346,7 +385,13 @@ function ProfilePageComponent({userData, userId}) {
         <section className="form-section">
           <h3>Notification Preferences</h3>
   <         div className="notification-preferences">
-            <NotificationToggle userId={userId} />
+              <NotificationToggle
+              value={formData.notificationPreferences.email}
+              onChange={(checked) => setFormData(prev => ({
+                ...prev,
+                notificationPreferences: { ...prev.notificationPreferences, email: checked }
+              }))}
+            />
           </div>
         </section>
 

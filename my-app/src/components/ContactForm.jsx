@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import './ContactForm.css';
+import { useNavigate } from 'react-router-dom';
 
 function ContactForm() {
+  const navigate = useNavigate();//used for rerouting after submitting inquiry
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -72,6 +75,8 @@ function ContactForm() {
           subject: '',
           message: ''
         });
+
+        navigate('/calendar'); 
       } catch (error) {
         console.error('Error submitting form:', error);
         setSubmitStatus('error');

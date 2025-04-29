@@ -1,8 +1,10 @@
 //EventCreationForm.jsx
-
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
 const EventCreationForm = () => {
+  const navigate = useNavigate();//used for rerouting after submitting inquiry
+  
   const [eventData, setEventData] = useState({
     title: '',
     description: '',
@@ -71,6 +73,7 @@ const EventCreationForm = () => {
   
       if (response.ok) {
         alert('Event submitted for approval!');
+        navigate('/calendar');
       } else {
         alert(`Error: ${data.error}`);
       }
