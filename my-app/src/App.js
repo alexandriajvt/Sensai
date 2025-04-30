@@ -4,7 +4,6 @@ import CalendarPage from './pages/CalendarPage';
 import ExplorePage from './pages/ExplorePage';
 //import EventDetailsPage from './pages/EventDetailsPage';
 import ProfilePage from './pages/ProfilePage';
-import SettingsPage from './pages/SettingsPage';
 import SignInPage from "./pages/SignInPage";
 import LogOutPage from "./pages/LogOutPage";
 import EventPage from './pages/EventPage';
@@ -29,7 +28,6 @@ function App() {
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/explore" element={<ExplorePage/>} />
-            <Route path="/settings" element={<SettingsPage/>} />
             <Route path="/profile" element={<ProfilePage/>} />
             <Route path="/calendar" element={<CalendarPage/>} />
             <Route path="/logout" element={<LogOutPage/>} />

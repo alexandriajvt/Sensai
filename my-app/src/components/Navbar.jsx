@@ -46,8 +46,6 @@ function MainNavBar() {
                   <NavDropdown.Divider />
                 </>
               )}
-              <NavDropdown.Item as={Link} to="/settings">Settings </NavDropdown.Item>
-              <NavDropdown.Divider />
               <NavDropdown.Item as={Link} to="/logout">Log Out </NavDropdown.Item>
             </NavDropdown>
           </Nav>
